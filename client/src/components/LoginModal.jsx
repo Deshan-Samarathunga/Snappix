@@ -1,11 +1,32 @@
 // client/src/components/LoginModal.jsx
 import React from 'react';
+import axios from 'axios';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { GoogleLogin } from '@react-oauth/google';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+
+
 
 export default function LoginModal({ show, onHide }) {
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const token = credentialResponse.credential;
+  
+    try {
+      const res = await axios.post("http://localhost:8080/api/auth/google", {
+        token: token,
+      });
+  
+      // Save user + session token
+      localStorage.setItem("snappixUser", JSON.stringify(res.data.user));
+      localStorage.setItem("snappixSession", res.data.token); // if you're issuing JWT
+  
+      onHide();
+      window.location.reload();
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
+  
+
   return (
     <Modal show={show} onHide={onHide} centered className="text-light">
       <Modal.Header closeButton className="bg-dark border-secondary">
@@ -15,10 +36,7 @@ export default function LoginModal({ show, onHide }) {
 
         <div className="d-grid mb-3">
           <GoogleLogin
-            onSuccess={(credentialResponse) => {
-              console.log("Google token:", credentialResponse.credential);
-              // You can send this token to your Spring Boot backend here
-            }}
+            onSuccess={handleGoogleSuccess}
             onError={() => {
               console.log('Google Login Failed');
             }}

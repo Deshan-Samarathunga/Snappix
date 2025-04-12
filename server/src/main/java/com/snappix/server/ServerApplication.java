@@ -1,3 +1,4 @@
+// server/src/main/java/com/snappix/server/ServerApplication.java
 package com.snappix.server;
 
 import org.springframework.boot.SpringApplication;
@@ -11,3 +12,5 @@ public class ServerApplication {
 	}
 
 }
+
+
