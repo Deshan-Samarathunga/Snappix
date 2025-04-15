@@ -1,0 +1,29 @@
+.post-card {
+    background: #1a1a1b;
+    border: 1px solid #343536;
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    color: #d7dadc;
+  }
+  
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .media-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .media-grid img,
+  .media-grid video {
+    max-width: 100%;
+    border-radius: 4px;
+    max-height: 250px;
+  }
+  
