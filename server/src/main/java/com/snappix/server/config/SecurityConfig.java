@@ -10,35 +10,38 @@ import com.snappix.server.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpMethod;
 
-
-@Configuration // Marks this class as a Spring configuration class
+@Configuration
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
-    // Injects the custom JWT filter via constructor
     public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
 
-    // Configures Spring Security's filter chain
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {}) // enable default CORS
-    
+            .cors(cors -> {}) // Enable default CORS
+
             .authorizeHttpRequests(auth -> auth
+                // 🔓 Public endpoints
                 .requestMatchers("/api/auth/google").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+
+                // 🔐 Protected endpoints
                 .requestMatchers(HttpMethod.POST, "/api/posts/create").authenticated()
-                .requestMatchers("/api/posts/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
+
                 .requestMatchers("/api/communities/**").authenticated()
                 .anyRequest().authenticated()
             )
-    
+
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-    
+
         return http.build();
     }
-    
 }

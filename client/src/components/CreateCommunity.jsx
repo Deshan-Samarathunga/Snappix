@@ -34,7 +34,7 @@ export default function CreateCommunity() {
     try {
       const token = localStorage.getItem("snappixSession");
       const formData = new FormData();
-      formData.append("name", name);
+      formData.append("name", name.trim());
       formData.append("description", description);
       formData.append("topics", JSON.stringify(selectedTopics));
       if (icon) formData.append("icon", icon);
@@ -70,7 +70,7 @@ export default function CreateCommunity() {
             marginTop: '60px',
             height: 'calc(100vh - 60px)',
             overflowY: 'auto',
-            backgroundColor: '#1a1a1b',
+            backgroundColor: '#000000',
           }}
         >
           <div className="w-100" style={{ maxWidth: '640px' }}>

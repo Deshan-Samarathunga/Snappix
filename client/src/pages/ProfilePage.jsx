@@ -46,7 +46,7 @@ export default function ProfilePage() {
     const fetchData = async () => {
       try {
         const [userRes, postsRes, commentsRes, likesRes, dislikesRes] = await Promise.all([
-          axios.get('http://localhost:8080/api/user/posts', { headers }),
+          axios.get('http://localhost:8080/api/posts', { headers }),
           axios.get('http://localhost:8080/api/user/comments', { headers }),
           axios.get('http://localhost:8080/api/user/likes', { headers }),
           axios.get('http://localhost:8080/api/user/dislikes', { headers }),
@@ -58,6 +58,7 @@ export default function ProfilePage() {
         // Set all fetched data to state
         setUserData(userRes.data);
         setPosts(postsRes.data);
+        console.log("Fetched Posts:", postsRes.data);
         setComments(commentsRes.data);
         setLikes(likesRes.data);
         setDislikes(dislikesRes.data);
@@ -126,7 +127,7 @@ export default function ProfilePage() {
             marginTop: '60px',
             height: 'calc(100vh - 60px)',
             overflowY: 'auto',
-            backgroundColor: '#1a1a1b',
+            backgroundColor: '#000000',
           }}
         >
           {/* Left content area with profile header and tabs */}
