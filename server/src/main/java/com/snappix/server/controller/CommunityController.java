@@ -51,13 +51,10 @@ public class CommunityController {
     @GetMapping("/name/{name}")
     public ResponseEntity<Object> getCommunityByName(@PathVariable String name) {
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
-    
-        if (found.isPresent()) {
-            return ResponseEntity.ok(found.get());
-        } else {
-            return ResponseEntity.status(404).body("Community not found");
-        }
+        return found.<ResponseEntity<Object>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(404).body("Community not found"));
     }
+    
     
 
     /**

@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import com.snappix.server.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
+
 
 @Configuration // Marks this class as a Spring configuration class
 public class SecurityConfig {
@@ -23,24 +25,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Disable CSRF since the app uses stateless token authentication
             .csrf(csrf -> csrf.disable())
-
-            // Enables CORS (Cross-Origin Resource Sharing)
-            .cors(cors -> {})
-
-            // Configure authorization rules
+            .cors(cors -> {}) // enable default CORS
+    
             .authorizeHttpRequests(auth -> auth
-                // Allow unauthenticated access to the Google login endpoint
                 .requestMatchers("/api/auth/google").permitAll()
-                // All other endpoints require authentication
+                .requestMatchers(HttpMethod.POST, "/api/posts/create").authenticated()
+                .requestMatchers("/api/posts/**").authenticated()
+                .requestMatchers("/api/communities/**").authenticated()
                 .anyRequest().authenticated()
             )
-
-            // Add the custom JWT filter before Spring Security's built-in authentication filter
+    
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // Build and return the security filter chain
+    
         return http.build();
     }
+    
 }
