@@ -4,8 +4,8 @@ import axios from 'axios';
 import './CreatePost.css';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import Topbar from './Topbar';
-import Sidebar from './Sidebar';
+import Topbar from '../components/Topbar';
+import Sidebar from '../components/Sidebar';
 
 export default function CreatePost() {
   const [activeTab, setActiveTab] = useState('text');
@@ -20,7 +20,7 @@ export default function CreatePost() {
     const token = localStorage.getItem("snappixSession");
     if (!token) return;
 
-    axios.get("http://localhost:8080/api/communities/my", {
+    axios.get("http://localhost:8080/api/communities/joined", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => setUserCommunities(res.data))
@@ -38,8 +38,9 @@ export default function CreatePost() {
     }
 
     const formData = new FormData();
+    formData.append("userName", JSON.parse(localStorage.getItem("snappixUser")).name);
     formData.append("description", title + '\n' + body);
-    formData.append("community", community);
+    formData.append("community", community.trim());
     media.forEach((file) => formData.append("media", file));
 
     try {

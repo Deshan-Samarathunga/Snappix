@@ -5,8 +5,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
   faImage, faHome, faComments, faCompass,
-  faUsers, faTags, faBookOpen, faBullhorn, faChartBar,
-  faCircleQuestion, faPenNib, faScrewdriverWrench, faUserCircle
+  faTags, faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 const sidebarButtonClass = "d-flex align-items-center gap-2 px-3 py-2 rounded text-light sidebar-hover";
@@ -18,16 +17,18 @@ export default function Sidebar() {
     const token = localStorage.getItem("snappixSession");
     if (!token) return;
 
-    axios.get("http://localhost:8080/api/communities/my", {
+    axios.get("http://localhost:8080/api/communities/joined", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => setCommunities(res.data))
-      .catch(err => console.error("Error fetching communities:", err));
+      .catch(err => console.error("Error fetching joined communities:", err));
   }, []);
 
+
   return (
-    <div className="bg-dark text-light p-3 position-fixed top-0 start-0 z-2"
-      style={{ width: '280px', height: '100vh', marginTop: '60px', overflowY: 'auto' }}>
+    <div className="bg-dark text-light p-3 position-fixed start-0 z-2"
+      style={{ top: '60px', width: '280px', height: 'calc(100vh - 60px)', overflowY: 'auto' }}>
+
 
       <style>{`
         .sidebar-hover:hover {
@@ -48,6 +49,16 @@ export default function Sidebar() {
           Home
         </Link>
 
+        {/* Explore Communities */}
+        <Link
+          to="/explore"
+          className={`${sidebarButtonClass} text-decoration-none text-info fw-semibold mt-2`}
+        >
+          <FontAwesomeIcon icon={faCompass} />
+          Explore Communities
+        </Link>
+
+
         {/* + Create a Community */}
         <Link
           to="/create-community"
@@ -62,7 +73,7 @@ export default function Sidebar() {
             {communities.map(c => (
               <Link
                 key={c.id}
-                to={`/c/${c.name}`}
+                to={`/c/${c.name.trim()}`}
                 className={`${sidebarButtonClass} text-decoration-none`}
               >
                 {c.iconUrl ? (
@@ -90,18 +101,6 @@ export default function Sidebar() {
         <div className="px-3 text-info">See more</div>
       </div>
 
-      {/* Other Links */}
-      <hr className="border-secondary" />
-      <h6 className="text-muted text-uppercase">Community</h6>
-      <div className="mb-3">
-        <div className={sidebarButtonClass}><FontAwesomeIcon icon={faUsers} /> Creators</div>
-        <div className={sidebarButtonClass}><FontAwesomeIcon icon={faBullhorn} /> Promote Work</div>
-        <div className={sidebarButtonClass}><FontAwesomeIcon icon={faChartBar} /> Analytics <span className="text-warning">BETA</span></div>
-        <div className={sidebarButtonClass}><FontAwesomeIcon icon={faCircleQuestion} /> Help Center</div>
-        <div className={sidebarButtonClass}><FontAwesomeIcon icon={faBookOpen} /> Blog</div>
-        <div className={sidebarButtonClass}><FontAwesomeIcon icon={faScrewdriverWrench} /> Careers</div>
-        <div className={sidebarButtonClass}><FontAwesomeIcon icon={faPenNib} /> Press</div>
-      </div>
     </div>
   );
 }

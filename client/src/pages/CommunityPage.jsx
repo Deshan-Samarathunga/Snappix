@@ -4,6 +4,8 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
+import PostCard from '../components/PostCard';
+
 
 export default function CommunityPage() {
   const { name } = useParams();
@@ -11,30 +13,29 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
 
-useEffect(() => {
-  const token = localStorage.getItem("snappixSession");
+  useEffect(() => {
+    const token = localStorage.getItem("snappixSession");
 
-  // Fetch community
-  axios.get(`http://localhost:8080/api/communities/name/${name}`)
-    .then(res => {
-      setCommunity(res.data);
-      setError(null);
+    // Fetch community
+    axios.get(`http://localhost:8080/api/communities/name/${name}`, {
+      headers: { Authorization: `Bearer ${token}` }
     })
-    .catch(err => {
-      console.error(err);
-      setError("Community not found.");
-    });
+      .then(res => {
+        setCommunity(res.data);
+        setError(null);
+      })
+      .catch(err => {
+        console.error(err);
+        setError("Community not found.");
+      });
 
-  // Fetch posts (with token)
-  axios.get(`http://localhost:8080/api/posts/community/${name}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(res => setPosts(res.data))
-    .catch(err => console.error("Failed to load posts", err));
-}, [name]);
-
-  
-
+    // Fetch posts
+    axios.get(`http://localhost:8080/api/posts/community/${name}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => setPosts(res.data))
+      .catch(err => console.error("Failed to load posts", err));
+  }, [name]);
 
   if (error) {
     return (
@@ -64,6 +65,13 @@ useEffect(() => {
     );
   }
 
+  const currentUserEmail = JSON.parse(localStorage.getItem("snappixUser"))?.email;
+  const roleBadge = community.createdBy === currentUserEmail
+    ? <span className="badge bg-warning text-dark ms-2">Moderator</span>
+    : community.members?.includes(currentUserEmail)
+      ? <span className="badge bg-info ms-2">Member</span>
+      : null;
+
   return (
     <div className="bg-black text-white min-vh-100">
       <Topbar />
@@ -71,7 +79,9 @@ useEffect(() => {
         <Sidebar />
         <div className="p-4 w-100" style={{ marginLeft: '280px', marginTop: '60px' }}>
           {community.bannerUrl && <img src={community.bannerUrl} className="img-fluid mb-3 rounded" alt="banner" />}
-          <h2 className="fw-bold">r/{community.name}</h2>
+          <h2 className="fw-bold">
+            {community.name} {roleBadge}
+          </h2>
           <p className="text-muted">{community.description}</p>
           {community.topics?.length > 0 && (
             <p className="text-muted">Topics: {community.topics.join(', ')}</p>
@@ -83,19 +93,7 @@ useEffect(() => {
             <p className="text-muted">No posts in this community yet.</p>
           ) : (
             posts.map(post => (
-              <div key={post.id} className="mb-4 p-3 border rounded bg-dark text-light">
-                <p className="fw-bold mb-1">{post.userEmail}</p>
-                <p>{post.description}</p>
-                {post.mediaUrls?.map((url, i) => (
-                  <div key={i} className="mb-2">
-                    {url.endsWith('.mp4') ? (
-                      <video src={url} controls className="w-100 rounded" />
-                    ) : (
-                      <img src={url} alt="media" className="img-fluid rounded" />
-                    )}
-                  </div>
-                ))}
-              </div>
+              <PostCard key={post.id} post={post} location="community" />
             ))
           )}
         </div>

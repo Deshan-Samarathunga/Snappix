@@ -14,15 +14,17 @@ public class Post {
     private String id;
 
     private String userEmail;
-    private String community; // New field: Community name or ID
+    private String userName; // ✅ added
+    private String community;
     private String description;
     private List<String> mediaUrls;
     private Date createdAt = new Date();
 
     public Post() {}
 
-    public Post(String userEmail, String community, String description, List<String> mediaUrls) {
+    public Post(String userEmail, String userName, String community, String description, List<String> mediaUrls) {
         this.userEmail = userEmail;
+        this.userName = userName;
         this.community = community;
         this.description = description;
         this.mediaUrls = mediaUrls;
@@ -32,6 +34,9 @@ public class Post {
 
     public String getUserEmail() { return userEmail; }
     public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
 
     public String getCommunity() { return community; }
     public void setCommunity(String community) { this.community = community; }

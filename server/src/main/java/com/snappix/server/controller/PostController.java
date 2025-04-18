@@ -22,13 +22,13 @@ public class PostController {
     @Autowired
     private S3Service s3Service;
 
-    // Create a new post with optional media
     @PostMapping("/create")
     public ResponseEntity<?> createPost(
-        @RequestParam("description") String description,
-        @RequestParam("community") String community,
-        @RequestPart(value = "media", required = false) List<MultipartFile> mediaFiles
-    ) {
+            @RequestParam("userName") String userName,
+            @RequestParam("description") String description,
+            @RequestParam("community") String community,
+            @RequestPart(value = "media", required = false) List<MultipartFile> mediaFiles) {
+
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<String> mediaUrls = new ArrayList<>();
@@ -43,25 +43,52 @@ public class PostController {
             return ResponseEntity.status(500).body("Media upload failed: " + e.getMessage());
         }
 
-        Post post = new Post(email, community, description, mediaUrls);
+        Post post = new Post(email, userName, community.trim().toLowerCase(), description, mediaUrls);
         Post saved = postRepo.save(post);
-
         return ResponseEntity.ok(saved);
     }
 
-    // Get all posts created by authenticated user
     @GetMapping
-    public ResponseEntity<?> getUserPosts() {
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Post> posts = postRepo.findByUserEmail(email);
-        return ResponseEntity.ok(posts);
+    public ResponseEntity<?> getAllPosts() {
+        return ResponseEntity.ok(postRepo.findAll());
     }
 
-    // 🔍 Get all posts by community name
     @GetMapping("/community/{name}")
     public ResponseEntity<?> getPostsByCommunity(@PathVariable String name) {
-        List<Post> posts = postRepo.findByCommunityIgnoreCase(name); // use new method
-        return ResponseEntity.ok(posts);
+        return ResponseEntity.ok(postRepo.findByCommunityIgnoreCase(name));
     }
-    
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable String id) {
+        try {
+            postRepo.deleteById(id);
+            return ResponseEntity.ok("Post deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to delete post");
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPostById(@PathVariable String id) {
+        Optional<Post> post = postRepo.findById(id);
+        if (post.isPresent()) {
+            return ResponseEntity.ok(post.get());
+        } else {
+            return ResponseEntity.status(404).body("Post not found");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePost(@PathVariable String id, @RequestBody Map<String, String> body) {
+        Optional<Post> optionalPost = postRepo.findById(id);
+        if (optionalPost.isEmpty()) {
+            return ResponseEntity.status(404).body("Post not found");
+        }
+
+        Post post = optionalPost.get();
+        post.setDescription(body.get("description"));
+        postRepo.save(post);
+        return ResponseEntity.ok("Post updated successfully");
+    }
+
 }

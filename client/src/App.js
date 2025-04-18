@@ -4,12 +4,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
-import CreatePost from './components/CreatePost';
+import CreatePost from './pages/CreatePost';
 import PrivateRoute from './components/PrivateRoute';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CreateCommunity from './components/CreateCommunity';
 import CommunityPage from './pages/CommunityPage';
+import ExploreCommunities from './pages/ExploreCommunities';
+import EditPost from './pages/EditPost';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
           <Route path="/create" element={<PrivateRoute><CreatePost /></PrivateRoute>} />
           <Route path="/create-community" element={<PrivateRoute><CreateCommunity /></PrivateRoute>} />
           <Route path="/c/:name" element={<CommunityPage />} />
+          <Route path="/explore" element={<PrivateRoute><ExploreCommunities /></PrivateRoute>} />
+          <Route path="/edit-post/:id" element={<EditPost />} />
         </Routes>
       </Router>
       <ToastContainer position="top-center" autoClose={2500} />
