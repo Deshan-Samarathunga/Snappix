@@ -23,8 +23,8 @@ export default function CreatePost() {
     axios.get("http://localhost:8080/api/communities/my", {
       headers: { Authorization: `Bearer ${token}` }
     })
-    .then(res => setUserCommunities(res.data))
-    .catch(err => console.error("Failed to fetch communities", err));
+      .then(res => setUserCommunities(res.data))
+      .catch(err => console.error("Failed to fetch communities", err));
   }, []);
 
   const handleFileChange = (e) => setMedia([...e.target.files]);
@@ -53,9 +53,10 @@ export default function CreatePost() {
       toast.success("✅ Post uploaded!");
       setTimeout(() => navigate("/profile"), 1500);
     } catch (err) {
-      console.error("Upload error:", err);
-      toast.error("❌ Upload failed.");
+      console.error("Upload error:", err.response?.data || err.message);
+      toast.error("❌ Upload failed: " + (err.response?.data || "Unknown error"));
     }
+
   };
 
   return (
@@ -85,7 +86,7 @@ export default function CreatePost() {
               >
                 <option value="">Select a community</option>
                 {userCommunities.map((c) => (
-                  <option key={c.id} value={c.name}>r/{c.name}</option>
+                  <option key={c.id} value={c.name}>{c.name}</option>
                 ))}
               </select>
             </div>

@@ -11,23 +11,30 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Fetch community
-    axios.get(`http://localhost:8080/api/communities/name/${name}`)
-      .then(res => {
-        setCommunity(res.data);
-        setError(null);
-      })
-      .catch(err => {
-        console.error(err);
-        setError("Community not found.");
-      });
+useEffect(() => {
+  const token = localStorage.getItem("snappixSession");
 
-    // Fetch posts in that community
-    axios.get(`http://localhost:8080/api/posts/community/${name}`)
-      .then(res => setPosts(res.data))
-      .catch(err => console.error(err));
-  }, [name]);
+  // Fetch community
+  axios.get(`http://localhost:8080/api/communities/name/${name}`)
+    .then(res => {
+      setCommunity(res.data);
+      setError(null);
+    })
+    .catch(err => {
+      console.error(err);
+      setError("Community not found.");
+    });
+
+  // Fetch posts (with token)
+  axios.get(`http://localhost:8080/api/posts/community/${name}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(res => setPosts(res.data))
+    .catch(err => console.error("Failed to load posts", err));
+}, [name]);
+
+  
+
 
   if (error) {
     return (

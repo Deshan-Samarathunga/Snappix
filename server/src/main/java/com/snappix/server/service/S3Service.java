@@ -42,16 +42,24 @@ public class S3Service {
 
     public String uploadFile(MultipartFile file) throws IOException {
         String key = UUID.randomUUID() + "_" + file.getOriginalFilename();
-
-        PutObjectRequest putRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .acl("public-read")
-                .contentType(file.getContentType())
-                .build();
-
-        getS3Client().putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
-
+    
+        try {
+            PutObjectRequest putRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .acl("public-read")
+                    .contentType(file.getContentType())
+                    .build();
+    
+            System.out.println("Uploading to S3: bucket=" + bucketName + ", key=" + key);
+    
+            getS3Client().putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
+        } catch (Exception e) {
+            System.err.println("❌ Failed to upload to S3: " + e.getMessage());
+            throw new IOException("S3 upload failed", e);
+        }
+    
         return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + key;
     }
+    
 }

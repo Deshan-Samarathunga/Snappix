@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface PostRepository extends MongoRepository<Post, String> {
     List<Post> findByUserEmail(String email);
+    List<Post> findByCommunity(String community);
+    List<Post> findByCommunityIgnoreCase(String community);
 }

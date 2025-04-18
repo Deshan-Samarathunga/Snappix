@@ -22,35 +22,46 @@ public class PostController {
     @Autowired
     private S3Service s3Service;
 
+    // Create a new post with optional media
     @PostMapping("/create")
     public ResponseEntity<?> createPost(
         @RequestParam("description") String description,
-        @RequestParam("community") String community, // ✅ add this
-        @RequestParam("media") List<MultipartFile> mediaFiles
+        @RequestParam("community") String community,
+        @RequestPart(value = "media", required = false) List<MultipartFile> mediaFiles
     ) {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    
+
         List<String> mediaUrls = new ArrayList<>();
         try {
-            for (MultipartFile file : mediaFiles) {
-                String url = s3Service.uploadFile(file);
-                mediaUrls.add(url);
+            if (mediaFiles != null) {
+                for (MultipartFile file : mediaFiles) {
+                    String url = s3Service.uploadFile(file);
+                    mediaUrls.add(url);
+                }
             }
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Media upload failed: " + e.getMessage());
         }
-    
-        Post post = new Post(email, community, description, mediaUrls); // ✅ now passes 4 args
+
+        Post post = new Post(email, community, description, mediaUrls);
         Post saved = postRepo.save(post);
-    
+
         return ResponseEntity.ok(saved);
     }
-    
 
+    // Get all posts created by authenticated user
     @GetMapping
     public ResponseEntity<?> getUserPosts() {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Post> posts = postRepo.findByUserEmail(email);
         return ResponseEntity.ok(posts);
     }
+
+    // 🔍 Get all posts by community name
+    @GetMapping("/community/{name}")
+    public ResponseEntity<?> getPostsByCommunity(@PathVariable String name) {
+        List<Post> posts = postRepo.findByCommunityIgnoreCase(name); // use new method
+        return ResponseEntity.ok(posts);
+    }
+    
 }

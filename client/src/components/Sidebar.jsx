@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
-   faImage, faComments, faCompass,
+  faImage, faHome, faComments, faCompass,
   faUsers, faTags, faBookOpen, faBullhorn, faChartBar,
   faCircleQuestion, faPenNib, faScrewdriverWrench, faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
@@ -21,14 +21,14 @@ export default function Sidebar() {
     axios.get("http://localhost:8080/api/communities/my", {
       headers: { Authorization: `Bearer ${token}` }
     })
-    .then(res => setCommunities(res.data))
-    .catch(err => console.error("Error fetching communities:", err));
+      .then(res => setCommunities(res.data))
+      .catch(err => console.error("Error fetching communities:", err));
   }, []);
 
   return (
     <div className="bg-dark text-light p-3 position-fixed top-0 start-0 z-2"
       style={{ width: '280px', height: '100vh', marginTop: '60px', overflowY: 'auto' }}>
-      
+
       <style>{`
         .sidebar-hover:hover {
           background-color: #2a2a2c;
@@ -38,9 +38,20 @@ export default function Sidebar() {
 
       {/* + Create a Community */}
       <div className="mb-3">
+
+        {/* Home Link */}
+        <Link
+          to="/"
+          className={`${sidebarButtonClass} text-decoration-none fw-semibold`}
+        >
+          <FontAwesomeIcon icon={faHome} />
+          Home
+        </Link>
+
+        {/* + Create a Community */}
         <Link
           to="/create-community"
-          className={`${sidebarButtonClass} text-decoration-none text-info fw-semibold`}
+          className={`${sidebarButtonClass} text-decoration-none text-info fw-semibold mt-2`}
         >
           + Create a Community
         </Link>
@@ -65,6 +76,7 @@ export default function Sidebar() {
           </div>
         )}
       </div>
+
 
       {/* Navigation */}
       <hr className="border-secondary" />
