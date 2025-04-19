@@ -1,27 +1,32 @@
 // client/src/components/UserProfile.jsx
-
-// component to show the current user's profile info,
-// pulled from localStorage (set after Google OAuth login)
-
 import React from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 export default function UserProfile() {
-  // Load the user data from localStorage
-  const user = JSON.parse(localStorage.getItem("snappixUser"));
+  const token = localStorage.getItem("snappixSession");
+  let user = null;
 
-  // If no user is found (not logged in), return nothing
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded.exp * 1000 > Date.now()) {
+        user = JSON.parse(localStorage.getItem("snappixUser"));
+      } else {
+        localStorage.removeItem("snappixSession");
+        localStorage.removeItem("snappixUser");
+      }
+    } catch {
+      localStorage.removeItem("snappixSession");
+      localStorage.removeItem("snappixUser");
+    }
+  }
+
   if (!user) return null;
 
   return (
-    // Styled profile card
     <div className="text-light p-3 bg-dark rounded shadow">
-      {/* User profile picture */}
       <img src={user.picture} alt="profile" className="rounded-circle mb-2" width={60} />
-      
-      {/* User name */}
       <h5>{user.name}</h5>
-
-      {/* User email in lighter text */}
       <p className="text-muted mb-0">{user.email}</p>
     </div>
   );

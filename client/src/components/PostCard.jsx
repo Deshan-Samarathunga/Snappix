@@ -6,10 +6,12 @@ import './PostCard.css';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import DeleteModal from './DeleteModal';
 
 export default function PostCard({ post, location = "home" }) {
   const [isOwner, setIsOwner] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -33,15 +35,14 @@ export default function PostCard({ post, location = "home" }) {
     navigate(`/edit-post/${post.id}`);
   };
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
-      const token = localStorage.getItem("snappixSession");
-      axios.delete(`http://localhost:8080/api/posts/${post.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+  const confirmDelete = () => {
+    const token = localStorage.getItem("snappixSession");
+    axios
+      .delete(`http://localhost:8080/api/posts/${post.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
-        .then(() => window.location.reload())
-        .catch(err => alert("❌ Delete failed"));
-    }
+      .then(() => window.location.reload())
+      .catch(() => alert("❌ Delete failed"));
   };
 
   return (
@@ -49,12 +50,11 @@ export default function PostCard({ post, location = "home" }) {
       <div className="post-header d-flex justify-content-between align-items-start">
         <div>
           <div className="fw-bold text-info" style={{ fontSize: '14px' }}>
-            {location === "home" ? `${post.community}` : `${post.userName || post.userEmail}`}
+            {location === "home" ? `r/${post.community}` : `${post.userName || post.userEmail}`}
           </div>
           <div className="text-muted fw-medium" style={{ fontSize: '12px' }}>
             {post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }) : ''}
           </div>
-
         </div>
 
         {isOwner && (
@@ -66,13 +66,15 @@ export default function PostCard({ post, location = "home" }) {
               onClick={() => setShowOptions(prev => !prev)}
             />
             {showOptions && (
-              <div className="position-absolute bg-dark border border-secondary rounded shadow-sm mt-2 text-white z-3"
-                style={{ right: 0, minWidth: 120 }}>
+              <div
+                className="position-absolute bg-dark border border-secondary rounded shadow-sm mt-2 text-white z-3"
+                style={{ right: 0, minWidth: 120 }}
+              >
                 <div className="px-3 py-2 hover-bg-secondary" role="button" onClick={handleEdit}>
                   <FontAwesomeIcon icon={faPen} className="me-2 text-warning" />
                   Edit
                 </div>
-                <div className="px-3 py-2 hover-bg-secondary" role="button" onClick={handleDelete}>
+                <div className="px-3 py-2 hover-bg-secondary" role="button" onClick={() => setShowDeleteModal(true)}>
                   <FontAwesomeIcon icon={faTrash} className="me-2 text-danger" />
                   Delete
                 </div>
@@ -84,20 +86,20 @@ export default function PostCard({ post, location = "home" }) {
 
       <div className="mb-2">
         <h5 className="fw-semibold">{(post.description || "").split('\n')[0]}</h5>
-        <p className="text-muted mb-2">{(post.description || "").split('\n').slice(1).join('\n') || "No description."}</p>
+        <p className="text-muted mb-2">
+          {(post.description || "").split('\n').slice(1).join('\n') || "No description."}
+        </p>
       </div>
 
       {post.mediaUrls?.length > 0 && (
-        <div className="media-grid mb-3">
-          {post.mediaUrls.map((url, i) => (
-            url.match(/\.(jpeg|jpg|png|gif)$/) ? (
-              <img key={i} src={url} alt="media" />
-            ) : (
-              <video key={i} controls>
-                <source src={url} />
-              </video>
-            )
-          ))}
+        <div className="media-container">
+          {post.mediaUrls[0].match(/\.(jpeg|jpg|png|gif)$/i) ? (
+            <img src={post.mediaUrls[0]} alt="media" />
+          ) : (
+            <video controls>
+              <source src={post.mediaUrls[0]} />
+            </video>
+          )}
         </div>
       )}
 
@@ -106,6 +108,12 @@ export default function PostCard({ post, location = "home" }) {
         <span><FontAwesomeIcon icon={faCommentDots} className="me-1" /> 0</span>
         <span><FontAwesomeIcon icon={faShare} className="me-1" /> Share</span>
       </div>
+
+      <DeleteModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

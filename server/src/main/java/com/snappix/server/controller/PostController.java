@@ -60,7 +60,23 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePost(@PathVariable String id) {
+        Optional<Post> optionalPost = postRepo.findById(id);
+
+        if (optionalPost.isEmpty()) {
+            return ResponseEntity.status(404).body("Post not found");
+        }
+
+        Post post = optionalPost.get();
+
         try {
+            // Delete media files from S3
+            if (post.getMediaUrls() != null) {
+                for (String url : post.getMediaUrls()) {
+                    s3Service.deleteFileByUrl(url);
+                }
+            }
+
+            // Delete the post document
             postRepo.deleteById(id);
             return ResponseEntity.ok("Post deleted successfully");
         } catch (Exception e) {

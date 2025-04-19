@@ -1,7 +1,7 @@
 // client/src/components/CreateCommunity.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import Topbar from './Topbar';
 import Sidebar from './Sidebar';
@@ -40,12 +40,12 @@ export default function CreateCommunity() {
       if (icon) formData.append("icon", icon);
       if (banner) formData.append("banner", banner);
 
-      const res = await axios.post("http://localhost:8080/api/communities", formData, {
+      const res = await api.post("/api/communities", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
+
 
       const newCommunity = res.data;
       toast.success("✅ Community created!");
