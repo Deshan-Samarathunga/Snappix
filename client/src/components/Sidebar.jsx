@@ -25,6 +25,7 @@ export default function Sidebar() {
   }, []);
 
 
+
   return (
     <div className="bg-dark text-light p-3 position-fixed start-0 z-2"
       style={{ top: '60px', width: '280px', height: 'calc(100vh - 60px)', overflowY: 'auto' }}>

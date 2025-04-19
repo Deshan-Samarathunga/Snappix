@@ -23,7 +23,7 @@ export default function HomePage() {
       <div className="d-flex">
         <Sidebar />
         <main
-          className="flex-grow-1 px-4 pt-4 pb-5"
+          className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center"
           style={{
             marginLeft: '280px',
             marginTop: '60px',
@@ -32,16 +32,19 @@ export default function HomePage() {
             backgroundColor: '#000000'
           }}
         >
-          {loading ? (
-            <p>Loading posts...</p>
-          ) : posts.length ? (
-            posts.map(post => (
-              <PostCard key={post.id} post={post} location="home" />
-            ))
-          ) : (
-            <p>No posts found.</p>
-          )}
+          <div className="w-100" style={{ maxWidth: '640px' }}>
+            {loading ? (
+              <p>Loading posts...</p>
+            ) : posts.length ? (
+              posts.map(post => (
+                <PostCard key={post.id} post={post} location="home" />
+              ))
+            ) : (
+              <p>No posts found.</p>
+            )}
+          </div>
         </main>
+
       </div>
     </div>
   );

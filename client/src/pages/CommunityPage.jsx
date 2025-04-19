@@ -82,15 +82,15 @@ export default function CommunityPage() {
           <h2 className="fw-bold">
             {community.name} {roleBadge}
           </h2>
-          <p className="text-muted">{community.description}</p>
+          <p className="text-light">{community.description}</p>
           {community.topics?.length > 0 && (
-            <p className="text-muted">Topics: {community.topics.join(', ')}</p>
+            <p className="text-light">Topics: {community.topics.join(', ')}</p>
           )}
 
           <hr className="border-secondary" />
           <h5 className="mb-3">Posts</h5>
           {posts.length === 0 ? (
-            <p className="text-muted">No posts in this community yet.</p>
+            <p className="text-light">No posts in this community yet.</p>
           ) : (
             posts.map(post => (
               <PostCard key={post.id} post={post} location="community" />

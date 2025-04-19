@@ -19,7 +19,7 @@ export default function LoginModal({ show, onHide }) {
 
       // Save user and session token to localStorage for later access
       localStorage.setItem("snappixUser", JSON.stringify(res.data.user));      // used by Topbar, etc.
-      localStorage.setItem("snappixSession", res.data.token);                 // used for auth headers
+      localStorage.setItem("snappixSession", res.data.accessToken);  // used for auth headers
 
       // Close modal and reload page to reflect login state
       onHide();
