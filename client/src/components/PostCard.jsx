@@ -15,6 +15,26 @@ export default function PostCard({ post, location = "home" }) {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
+  // New: Like and Comment functionality
+  const [liked, setLiked] = useState(false);
+  const [showCommentBox, setShowCommentBox] = useState(false);
+  const [commentText, setCommentText] = useState("");
+
+  const handleLike = () => {
+    setLiked(prev => !prev);
+  };
+
+  const handleCommentToggle = () => {
+    setShowCommentBox(prev => !prev);
+  };
+
+  const handleCommentSubmit = () => {
+    if (commentText.trim()) {
+      console.log("Comment submitted:", commentText); // Replace this with API call later
+      setCommentText("");
+    }
+  };
+
   useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("snappixUser"));
     if (currentUser?.email === post.userEmail) {
@@ -103,10 +123,45 @@ export default function PostCard({ post, location = "home" }) {
         </div>
       )}
 
-      <div className="d-flex gap-3 align-items-center">
-        <span><FontAwesomeIcon icon={faThumbsUp} className="me-1" /> 0</span>
-        <span><FontAwesomeIcon icon={faCommentDots} className="me-1" /> 0</span>
-        <span><FontAwesomeIcon icon={faShare} className="me-1" /> Share</span>
+      {/* Updated Section: Like, Comment, Share */}
+      <div className="d-flex flex-column gap-2">
+        <div className="d-flex gap-3 align-items-center">
+          <span role="button" onClick={handleLike}>
+            <FontAwesomeIcon
+              icon={faThumbsUp}
+              className={`me-1 ${liked ? "text-primary" : "text-white"}`}
+            />
+            {liked ? 1 : 0}
+          </span>
+
+          <span role="button" onClick={handleCommentToggle}>
+            <FontAwesomeIcon icon={faCommentDots} className="me-1 text-white" />
+            Comment
+          </span>
+
+          <span role="button">
+            <FontAwesomeIcon icon={faShare} className="me-1 text-white" />
+            Share
+          </span>
+        </div>
+
+        {showCommentBox && (
+          <div className="mt-2">
+            <textarea
+              className="form-control bg-dark text-white"
+              rows="2"
+              placeholder="Write a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+            />
+            <button
+              className="btn btn-sm btn-info mt-2"
+              onClick={handleCommentSubmit}
+            >
+              Post Comment
+            </button>
+          </div>
+        )}
       </div>
 
       <DeleteModal
