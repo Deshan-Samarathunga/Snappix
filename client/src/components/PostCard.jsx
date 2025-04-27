@@ -1,4 +1,3 @@
-// client/src/components/PostCard.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faCommentDots, faShare, faEllipsisV, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -15,10 +14,10 @@ export default function PostCard({ post, location = "home" }) {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  // New: Like and Comment functionality
   const [liked, setLiked] = useState(false);
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState([]); // <- New
 
   const handleLike = () => {
     setLiked(prev => !prev);
@@ -30,9 +29,18 @@ export default function PostCard({ post, location = "home" }) {
 
   const handleCommentSubmit = () => {
     if (commentText.trim()) {
-      console.log("Comment submitted:", commentText); // Replace this with API call later
+      const newComment = {
+        id: Date.now(), // simple unique id
+        text: commentText,
+        createdAt: new Date().toISOString(),
+      };
+      setComments(prev => [...prev, newComment]);
       setCommentText("");
     }
+  };
+
+  const handleDeleteComment = (id) => {
+    setComments(prevComments => prevComments.filter(comment => comment.id !== id));
   };
 
   useEffect(() => {
@@ -123,7 +131,7 @@ export default function PostCard({ post, location = "home" }) {
         </div>
       )}
 
-      {/* Updated Section: Like, Comment, Share */}
+      {/* Like, Comment, Share */}
       <div className="d-flex flex-column gap-2">
         <div className="d-flex gap-3 align-items-center">
           <span role="button" onClick={handleLike}>
@@ -160,6 +168,31 @@ export default function PostCard({ post, location = "home" }) {
             >
               Post Comment
             </button>
+          </div>
+        )}
+
+        {/* List of Comments */}
+        {comments.length > 0 && (
+          <div className="comments-list mt-3">
+            {comments.map((comment) => (
+              <div key={comment.id} className="bg-secondary text-white p-2 rounded mb-2 d-flex justify-content-between align-items-start">
+                <div>
+                  <div style={{ fontSize: '12px' }} className="text-muted">
+                    {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                  </div>
+                  <div style={{ fontSize: '14px' }}>
+                    {comment.text}
+                  </div>
+                </div>
+                <button
+                  className="btn btn-sm btn-danger ms-2"
+                  onClick={() => handleDeleteComment(comment.id)}
+                  style={{ fontSize: '10px', height: 'fit-content' }}
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
