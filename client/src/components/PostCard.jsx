@@ -4,8 +4,7 @@ import { faThumbsUp, faCommentDots, faShare, faEllipsisV, faPen, faTrash } from 
 import './PostCard.css';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import DeleteModal from './DeleteModal';
+import DeleteModal from './DeleteModal';  // Import the DeleteModal component
 
 export default function PostCard({ post, location = "home" }) {
   const [isOwner, setIsOwner] = useState(false);
@@ -17,12 +16,20 @@ export default function PostCard({ post, location = "home" }) {
   const [liked, setLiked] = useState(false);
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState([]);
-  const [editingCommentId, setEditingCommentId] = useState(null); // New state for editing
-  const [editCommentText, setEditCommentText] = useState(""); // New state for comment text while editing
+  const [comments, setComments] = useState([]); // Store comments state
+
+  useEffect(() => {
+    const savedComments = JSON.parse(localStorage.getItem(`comments_${post.id}`)) || [];
+    const savedLiked = JSON.parse(localStorage.getItem(`liked_${post.id}`)) || false;
+
+    setComments(savedComments);
+    setLiked(savedLiked);
+  }, [post.id]);
 
   const handleLike = () => {
-    setLiked(prev => !prev);
+    const newLikedStatus = !liked;
+    setLiked(newLikedStatus);
+    localStorage.setItem(`liked_${post.id}`, JSON.stringify(newLikedStatus));
   };
 
   const handleCommentToggle = () => {
@@ -32,30 +39,36 @@ export default function PostCard({ post, location = "home" }) {
   const handleCommentSubmit = () => {
     if (commentText.trim()) {
       const newComment = {
-        id: Date.now(), // simple unique id
+        id: Date.now(),
         text: commentText,
         createdAt: new Date().toISOString(),
       };
-      setComments(prev => [...prev, newComment]);
+      const updatedComments = [...comments, newComment];
+      setComments(updatedComments);
       setCommentText("");
+      localStorage.setItem(`comments_${post.id}`, JSON.stringify(updatedComments));
     }
   };
 
   const handleDeleteComment = (id) => {
-    setComments(prevComments => prevComments.filter(comment => comment.id !== id));
+    const updatedComments = comments.filter(comment => comment.id !== id);
+    setComments(updatedComments);
+    localStorage.setItem(`comments_${post.id}`, JSON.stringify(updatedComments));
   };
 
-  const handleEditComment = (id, text) => {
-    setEditingCommentId(id);
-    setEditCommentText(text);
+  const handleEditComment = (id) => {
+    const updatedComments = comments.map(comment =>
+      comment.id === id ? { ...comment, isEditing: true } : comment
+    );
+    setComments(updatedComments);
   };
 
-  const handleUpdateComment = () => {
-    setComments(prevComments => prevComments.map(comment => 
-      comment.id === editingCommentId ? { ...comment, text: editCommentText } : comment
-    ));
-    setEditingCommentId(null);
-    setEditCommentText("");
+  const handleSaveEdit = (id, newText) => {
+    const updatedComments = comments.map(comment =>
+      comment.id === id ? { ...comment, text: newText, isEditing: false } : comment
+    );
+    setComments(updatedComments);
+    localStorage.setItem(`comments_${post.id}`, JSON.stringify(updatedComments));
   };
 
   useEffect(() => {
@@ -79,13 +92,9 @@ export default function PostCard({ post, location = "home" }) {
   };
 
   const confirmDelete = () => {
-    const token = localStorage.getItem("snappixSession");
-    axios
-      .delete(`http://localhost:8080/api/posts/${post.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(() => window.location.reload())
-      .catch(() => alert("❌ Delete failed"));
+    localStorage.removeItem(`comments_${post.id}`);
+    localStorage.removeItem(`liked_${post.id}`);
+    window.location.reload();
   };
 
   return (
@@ -195,33 +204,35 @@ export default function PostCard({ post, location = "home" }) {
                   <div style={{ fontSize: '12px' }} className="text-muted">
                     {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                   </div>
-                  <div style={{ fontSize: '14px' }}>
-                    {editingCommentId === comment.id ? (
+                  {comment.isEditing ? (
+                    <div>
                       <textarea
                         className="form-control bg-dark text-white"
                         rows="2"
-                        value={editCommentText}
-                        onChange={(e) => setEditCommentText(e.target.value)}
+                        value={comment.text}
+                        onChange={(e) => {
+                          const updatedComments = comments.map((com) =>
+                            com.id === comment.id ? { ...com, text: e.target.value } : com
+                          );
+                          setComments(updatedComments);
+                        }}
                       />
-                    ) : (
-                      comment.text
-                    )}
-                  </div>
-                </div>
-                <div className="d-flex">
-                  {editingCommentId === comment.id ? (
-                    <button
-                      className="btn btn-sm btn-info ms-2"
-                      onClick={handleUpdateComment}
-                      style={{ fontSize: '10px' }}
-                    >
-                      Save
-                    </button>
+                      <button
+                        className="btn btn-sm btn-success mt-2"
+                        onClick={() => handleSaveEdit(comment.id, comment.text)}
+                      >
+                        Save
+                      </button>
+                    </div>
                   ) : (
+                    <div>{comment.text}</div>
+                  )}
+                </div>
+                <div>
+                  {!comment.isEditing && (
                     <button
                       className="btn btn-sm btn-warning ms-2"
-                      onClick={() => handleEditComment(comment.id, comment.text)}
-                      style={{ fontSize: '10px' }}
+                      onClick={() => handleEditComment(comment.id)}
                     >
                       Edit
                     </button>
@@ -229,7 +240,6 @@ export default function PostCard({ post, location = "home" }) {
                   <button
                     className="btn btn-sm btn-danger ms-2"
                     onClick={() => handleDeleteComment(comment.id)}
-                    style={{ fontSize: '10px' }}
                   >
                     Delete
                   </button>
@@ -240,11 +250,13 @@ export default function PostCard({ post, location = "home" }) {
         )}
       </div>
 
-      <DeleteModal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        onConfirm={confirmDelete}
-      />
+      {showDeleteModal && (
+        <DeleteModal
+          show={showDeleteModal}
+          handleClose={() => setShowDeleteModal(false)}
+          confirmDelete={confirmDelete}
+        />
+      )}
     </div>
   );
 }
