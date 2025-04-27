@@ -17,7 +17,9 @@ export default function PostCard({ post, location = "home" }) {
   const [liked, setLiked] = useState(false);
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState([]); // <- New
+  const [comments, setComments] = useState([]);
+  const [editingCommentId, setEditingCommentId] = useState(null); // New state for editing
+  const [editCommentText, setEditCommentText] = useState(""); // New state for comment text while editing
 
   const handleLike = () => {
     setLiked(prev => !prev);
@@ -41,6 +43,19 @@ export default function PostCard({ post, location = "home" }) {
 
   const handleDeleteComment = (id) => {
     setComments(prevComments => prevComments.filter(comment => comment.id !== id));
+  };
+
+  const handleEditComment = (id, text) => {
+    setEditingCommentId(id);
+    setEditCommentText(text);
+  };
+
+  const handleUpdateComment = () => {
+    setComments(prevComments => prevComments.map(comment => 
+      comment.id === editingCommentId ? { ...comment, text: editCommentText } : comment
+    ));
+    setEditingCommentId(null);
+    setEditCommentText("");
   };
 
   useEffect(() => {
@@ -181,16 +196,44 @@ export default function PostCard({ post, location = "home" }) {
                     {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                   </div>
                   <div style={{ fontSize: '14px' }}>
-                    {comment.text}
+                    {editingCommentId === comment.id ? (
+                      <textarea
+                        className="form-control bg-dark text-white"
+                        rows="2"
+                        value={editCommentText}
+                        onChange={(e) => setEditCommentText(e.target.value)}
+                      />
+                    ) : (
+                      comment.text
+                    )}
                   </div>
                 </div>
-                <button
-                  className="btn btn-sm btn-danger ms-2"
-                  onClick={() => handleDeleteComment(comment.id)}
-                  style={{ fontSize: '10px', height: 'fit-content' }}
-                >
-                  Delete
-                </button>
+                <div className="d-flex">
+                  {editingCommentId === comment.id ? (
+                    <button
+                      className="btn btn-sm btn-info ms-2"
+                      onClick={handleUpdateComment}
+                      style={{ fontSize: '10px' }}
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-sm btn-warning ms-2"
+                      onClick={() => handleEditComment(comment.id, comment.text)}
+                      style={{ fontSize: '10px' }}
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button
+                    className="btn btn-sm btn-danger ms-2"
+                    onClick={() => handleDeleteComment(comment.id)}
+                    style={{ fontSize: '10px' }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
