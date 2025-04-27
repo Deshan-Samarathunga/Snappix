@@ -12,6 +12,7 @@ import ExploreCommunities from './pages/ExploreCommunities';
 import EditPost from './pages/EditPost';
 import PrivateRoute from './components/PrivateRoute';
 import SessionManager from './components/SessionManager';
+import AddCourse from './components/AddCourse';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -29,6 +30,7 @@ function App() {
           <Route path="/c/:name" element={<CommunityPage />} />
           <Route path="/explore" element={<PrivateRoute><ExploreCommunities /></PrivateRoute>} />
           <Route path="/edit-post/:id" element={<EditPost />} />
+          <Route path="/add-course" element={<PrivateRoute><AddCourse /></PrivateRoute>} />
         </Routes>
       </Router>
       <ToastContainer position="top-center" autoClose={2500} />
