@@ -1,7 +1,13 @@
 // client/src/components/CreateCommunity.jsx
+
+//remove these and uncomment
+//import axios from 'axios';
+//const res = await axios.post("http://localhost:8080/api/communities", formData, {
+//Authorization: `Bearer ${token}`,
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/axiosInstance';
+//import api from '../utils/axiosInstance';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 import Topbar from './Topbar';
 import Sidebar from './Sidebar';
@@ -40,8 +46,10 @@ export default function CreateCommunity() {
       if (icon) formData.append("icon", icon);
       if (banner) formData.append("banner", banner);
 
-      const res = await api.post("/api/communities", formData, {
+      const res = await axios.post("http://localhost:8080/api/communities", formData, {
+      //const res = await api.post("/api/communities", formData, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
@@ -52,7 +60,7 @@ export default function CreateCommunity() {
       navigate(`/c/${newCommunity.name}`); // redirect to community page
     } catch (err) {
       console.error("Error details:", err.response?.data || err.message);
-      console.error(err); // optional: keep this if you want the full stack
+      console.error(err); 
       toast.error("❌ Failed to create community.");
     }
 
