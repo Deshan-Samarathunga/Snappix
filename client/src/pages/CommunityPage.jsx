@@ -6,7 +6,6 @@ import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
 import PostCard from '../components/PostCard';
 
-
 export default function CommunityPage() {
   const { name } = useParams();
   const [community, setCommunity] = useState(null);
@@ -15,7 +14,6 @@ export default function CommunityPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("snappixSession");
-
     // Fetch community
     axios.get(`http://localhost:8080/api/communities/name/${name}`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -28,7 +26,6 @@ export default function CommunityPage() {
         console.error(err);
         setError("Community not found.");
       });
-
     // Fetch posts
     axios.get(`http://localhost:8080/api/posts/community/${name}`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -41,12 +38,10 @@ export default function CommunityPage() {
     return (
       <div className="bg-black text-white min-vh-100">
         <Topbar />
-        <div className="d-flex">
-          <Sidebar />
-          <div className="p-4 w-100" style={{ marginLeft: '280px', marginTop: '60px' }}>
-            <h3>{error}</h3>
-          </div>
-        </div>
+        <Sidebar />
+        <main className="flex-grow-1 px-5 pt-5">
+          <h2>{error}</h2>
+        </main>
       </div>
     );
   }
@@ -55,48 +50,38 @@ export default function CommunityPage() {
     return (
       <div className="bg-black text-white min-vh-100">
         <Topbar />
-        <div className="d-flex">
-          <Sidebar />
-          <div className="p-4 w-100" style={{ marginLeft: '280px', marginTop: '60px' }}>
-            <p>Loading community...</p>
-          </div>
-        </div>
+        <Sidebar />
+        <main className="flex-grow-1 px-5 pt-5">
+          <h2>Loading community...</h2>
+        </main>
       </div>
     );
   }
-
-  const currentUserEmail = JSON.parse(localStorage.getItem("snappixUser"))?.email;
-  const roleBadge = community.createdBy === currentUserEmail
-    ? <span className="badge bg-warning text-dark ms-2">Moderator</span>
-    : community.members?.includes(currentUserEmail)
-      ? <span className="badge bg-info ms-2">Member</span>
-      : null;
 
   return (
     <div className="bg-black text-white min-vh-100">
       <Topbar />
       <div className="d-flex">
         <Sidebar />
-        <div className="p-4 w-100" style={{ marginLeft: '280px', marginTop: '60px' }}>
-          {community.bannerUrl && <img src={community.bannerUrl} className="img-fluid mb-3 rounded" alt="banner" />}
-          <h2 className="fw-bold">
-            {community.name} {roleBadge}
-          </h2>
-          <p className="text-light">{community.description}</p>
+        <main className="flex-grow-1 px-5 pt-5" style={{ marginLeft: '280px', marginTop: '60px', backgroundColor: '#1a1a1b' }}>
+          <h2 className="fw-bold mb-2">{community.name}</h2>
+          <p>{community.description}</p>
           {community.topics?.length > 0 && (
-            <p className="text-light">Topics: {community.topics.join(', ')}</p>
+            <div>
+              <b>Topics:</b> {community.topics.join(', ')}
+            </div>
           )}
-
-          <hr className="border-secondary" />
-          <h5 className="mb-3">Posts</h5>
-          {posts.length === 0 ? (
-            <p className="text-light">No posts in this community yet.</p>
-          ) : (
-            posts.map(post => (
-              <PostCard key={post.id} post={post} location="community" />
-            ))
-          )}
-        </div>
+          <div className="mt-4">
+            <h4>Posts</h4>
+            {posts.length === 0 ? (
+              <div>No posts in this community yet.</div>
+            ) : (
+              posts.map(post => (
+                <PostCard key={post.id} post={post} />
+              ))
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );
