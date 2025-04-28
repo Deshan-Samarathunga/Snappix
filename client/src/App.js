@@ -1,4 +1,3 @@
-// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
@@ -10,6 +9,7 @@ import CreateCommunity from './components/CreateCommunity';
 import CommunityPage from './pages/CommunityPage';
 import ExploreCommunities from './pages/ExploreCommunities';
 import EditPost from './pages/EditPost';
+import EditCommunity from './pages/EditCommunity';
 import PrivateRoute from './components/PrivateRoute';
 import SessionManager from './components/SessionManager';
 
@@ -20,7 +20,7 @@ function App() {
   return (
     <>
       <Router>
-        <SessionManager /> {/* ⏱️ Inactivity auto logout + silent refresh on load */}
+        <SessionManager />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
@@ -29,6 +29,7 @@ function App() {
           <Route path="/c/:name" element={<CommunityPage />} />
           <Route path="/explore" element={<PrivateRoute><ExploreCommunities /></PrivateRoute>} />
           <Route path="/edit-post/:id" element={<EditPost />} />
+          <Route path="/edit-community/:id" element={<PrivateRoute><EditCommunity /></PrivateRoute>} />
         </Routes>
       </Router>
       <ToastContainer position="top-center" autoClose={2500} />

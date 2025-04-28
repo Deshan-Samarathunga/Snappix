@@ -5,6 +5,9 @@ import axios from 'axios';
 import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
 import PostCard from '../components/PostCard';
+import './EditCommunity.css';
+
+
 
 export default function CommunityPage() {
   const { name } = useParams();

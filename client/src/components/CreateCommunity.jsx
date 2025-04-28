@@ -1,14 +1,20 @@
-// src/components/CreateCommunity.jsx
+// client/src/components/CreateCommunity.jsx
+
+//remove these and uncomment
+//import axios from 'axios';
+//const res = await axios.post("http://localhost:8080/api/communities", formData, {
+//Authorization: `Bearer ${token}`,
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+//import api from '../utils/axiosInstance';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Topbar from './Topbar';
 import Sidebar from './Sidebar';
 
 const topicsList = [
-  "Filmmaking", "Photography", "Gear", "Editing", "Cinematic", "Analog",
-  "Nature", "Portrait", "Urban", "Events", "Drone", "Experimental"
+  "Filmmaking", "Photography", "Gear", "Editing", "Cinematic",
+  "Analog", "Nature", "Portrait", "Urban", "Events", "Drone", "Experimental"
 ];
 
 export default function CreateCommunity() {
@@ -24,7 +30,9 @@ export default function CreateCommunity() {
     setSelectedTopics(prev =>
       prev.includes(topic)
         ? prev.filter(t => t !== topic)
-        : prev.length < 3 ? [...prev, topic] : prev
+        : prev.length < 3
+          ? [...prev, topic]
+          : prev
     );
   };
 
@@ -39,18 +47,23 @@ export default function CreateCommunity() {
       if (banner) formData.append("banner", banner);
 
       const res = await axios.post("http://localhost:8080/api/communities", formData, {
+      //const res = await api.post("/api/communities", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
+
+
       const newCommunity = res.data;
       toast.success("✅ Community created!");
-      navigate(`/c/${newCommunity.name}`);
+      navigate(`/c/${newCommunity.name}`); // redirect to community page
     } catch (err) {
       console.error("Error details:", err.response?.data || err.message);
+      console.error(err); 
       toast.error("❌ Failed to create community.");
     }
+
   };
 
   return (
@@ -58,52 +71,81 @@ export default function CreateCommunity() {
       <Topbar />
       <div className="d-flex">
         <Sidebar />
-        <main className="flex-grow-1 px-5 pt-5" style={{ marginLeft: '280px', marginTop: '60px', backgroundColor: '#1a1a1b' }}>
-          <h2 className="fw-bold mb-4">Create a Community</h2>
-          {step === 1 && (
-            <>
-              <div>
-                <label>Community Name</label>
-                <input className="form-control mb-2" value={name} onChange={e => setName(e.target.value)} maxLength={32} />
-                <label>Description</label>
-                <textarea className="form-control mb-2" value={description} onChange={e => setDescription(e.target.value)} maxLength={200} />
-                <label>Icon (optional)</label>
-                <input type="file" accept="image/*" className="form-control mb-2" onChange={e => setIcon(e.target.files[0])} />
-                <label>Banner (optional)</label>
-                <input type="file" accept="image/*" className="form-control mb-2" onChange={e => setBanner(e.target.files[0])} />
-                <label>Select up to 3 topics:</label>
+        <main
+          className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center"
+          style={{
+            marginLeft: '280px',
+            marginTop: '60px',
+            height: 'calc(100vh - 60px)',
+            overflowY: 'auto',
+            backgroundColor: '#000000',
+          }}
+        >
+          <div className="w-100" style={{ maxWidth: '640px' }}>
+            <h3 className="fw-bold mb-4">Create a Community</h3>
+
+            {step === 1 && (
+              <>
                 <div className="mb-3">
+                  <label className="form-label">Community Name*</label>
+                  <input type="text" className="form-control bg-dark text-light border-secondary" value={name} required onChange={e => setName(e.target.value)} />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Description*</label>
+                  <textarea className="form-control bg-dark text-light border-secondary" value={description} required onChange={e => setDescription(e.target.value)} rows="4" />
+                </div>
+                <button className="btn btn-warning" onClick={() => setStep(2)}>Next</button>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <div className="mb-3">
+                  <label className="form-label">Upload Icon</label>
+                  <input type="file" accept="image/*" className="form-control" onChange={e => setIcon(e.target.files[0])} />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Upload Banner</label>
+                  <input type="file" accept="image/*" className="form-control" onChange={e => setBanner(e.target.files[0])} />
+                </div>
+                <button className="btn btn-secondary me-2" onClick={() => setStep(1)}>Back</button>
+                <button className="btn btn-warning" onClick={() => setStep(3)}>Next</button>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <p>Select up to 3 topics that fit your community:</p>
+                <div className="d-flex flex-wrap gap-2 mb-3">
                   {topicsList.map(topic => (
                     <button
                       key={topic}
-                      className={`btn btn-sm m-1 ${selectedTopics.includes(topic) ? "btn-info" : "btn-outline-info"}`}
-                      onClick={() => toggleTopic(topic)}
                       type="button"
+                      className={`btn btn-sm ${selectedTopics.includes(topic) ? 'btn-info' : 'btn-outline-secondary'}`}
+                      onClick={() => toggleTopic(topic)}
                     >
                       {topic}
                     </button>
                   ))}
                 </div>
-                <button className="btn btn-primary" onClick={() => setStep(2)} disabled={!name || !description || selectedTopics.length === 0}>
-                  Next
-                </button>
-              </div>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              <h5>Confirm Details</h5>
-              <ul>
-                <li><b>Name:</b> {name}</li>
-                <li><b>Description:</b> {description}</li>
-                <li><b>Topics:</b> {selectedTopics.join(", ")}</li>
-                <li><b>Icon:</b> {icon ? icon.name : "None"}</li>
-                <li><b>Banner:</b> {banner ? banner.name : "None"}</li>
-              </ul>
-              <button className="btn btn-secondary me-2" onClick={() => setStep(1)}>Back</button>
-              <button className="btn btn-success" onClick={handleSubmit}>Create Community</button>
-            </>
-          )}
+                <button className="btn btn-secondary me-2" onClick={() => setStep(2)}>Back</button>
+                <button className="btn btn-warning" onClick={() => setStep(4)}>Next</button>
+              </>
+            )}
+
+            {step === 4 && (
+              <>
+                <h5 className="text-success">Confirm Details</h5>
+                <ul className="list-group mb-3">
+                  <li className="list-group-item bg-dark text-light">Name: {name}</li>
+                  <li className="list-group-item bg-dark text-light">Description: {description}</li>
+                  <li className="list-group-item bg-dark text-light">Topics: {selectedTopics.join(", ")}</li>
+                </ul>
+                <button className="btn btn-secondary me-2" onClick={() => setStep(3)}>Back</button>
+                <button className="btn btn-success" onClick={handleSubmit}>Create Community</button>
+              </>
+            )}
+          </div>
         </main>
       </div>
     </div>
