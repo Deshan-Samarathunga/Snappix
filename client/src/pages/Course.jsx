@@ -70,7 +70,7 @@ export default function Course() {
       await axios.delete(`http://localhost:8080/api/courses/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('✅ Course deleted');
+      toast.success('✅ Course deleted successfully');
       navigate(`/c/${course.community}`);
     } catch (err) {
       console.error(err);
@@ -103,7 +103,7 @@ export default function Course() {
             marginTop: '60px',
             height: 'calc(100vh - 60px)',
             overflowY: 'auto',
-            backgroundColor: '#000000',
+            backgroundColor: '#1a1a1a',
           }}
         >
           <div
@@ -111,29 +111,50 @@ export default function Course() {
             style={{ maxWidth: '640px' }}
           >
             {/* Course Details */}
-            <h2 className="fw-bold mb-3">{course.courseName}</h2>
-            <p><strong>Description:</strong> {course.description}</p>
-            <p><strong>Category:</strong> {course.category}</p>
-            <p><strong>Tutor:</strong> {course.tutorName}</p>
-            <p><strong>Creator Email:</strong> {course.creatorEmail}</p>
-            <p><strong>Creator WhatsApp:</strong> {course.creatorWhatsapp}</p>
+            <h2 className="fw-bold mb-4 text-warning">{course.courseName}</h2>
 
-            {/* Action Buttons */}
-            <div className="d-flex gap-2 mt-4">
+            <div className="mb-3">
+              <strong>Description:</strong>
+              <p className="text-light">{course.description}</p>
+            </div>
+
+            <div className="mb-3">
+              <strong>Category:</strong>
+              <p className="text-light">{course.category}</p>
+            </div>
+
+            <div className="mb-3">
+              <strong>Tutor Name:</strong>
+              <p className="text-light">{course.tutorName}</p>
+            </div>
+
+            <div className="mb-3">
+              <strong>Creator Email:</strong>
+              <p className="text-light">{course.creatorEmail}</p>
+            </div>
+
+            <div className="mb-3">
+              <strong>Creator WhatsApp No.:</strong>
+              <p className="text-light">{course.creatorWhatsapp}</p>
+            </div>
+
+            {/* Action Buttons - at bottom */}
+            <div className="d-flex justify-content-end gap-2 mt-5">
               {isContributor && (
                 <>
-                  <button className="btn btn-sm btn-warning" onClick={handleUpdate}>
+                  <button className="btn btn-warning btn-sm" onClick={handleUpdate}>
                     Update
                   </button>
-                  <button className="btn btn-sm btn-danger" onClick={handleDelete}>
+                  <button className="btn btn-danger btn-sm" onClick={handleDelete}>
                     Delete
                   </button>
                 </>
               )}
-              <button className="btn btn-sm btn-success" onClick={handleEnroll}>
+              <button className="btn btn-success btn-sm" onClick={handleEnroll}>
                 Enroll Me
               </button>
             </div>
+
           </div>
         </main>
       </div>

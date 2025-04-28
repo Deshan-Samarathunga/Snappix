@@ -48,6 +48,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
 		<!-- Google Auth -->
 		<dependency>
 			<groupId>com.google.api-client</groupId>
@@ -93,6 +97,19 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<!--Lombok-->
+		<dependency>
+    		<groupId>org.projectlombok</groupId>
+    		<artifactId>lombok</artifactId>
+    		<version>1.18.30</version> <!-- Latest stable version -->
+    		<scope>provided</scope>
+		</dependency>
+		<!--Jakarta-->
+		<dependency>
+    		<groupId>jakarta.persistence</groupId>
+    		<artifactId>jakarta.persistence-api</artifactId>
+    		<version>3.1.0</version>
 		</dependency>
 	</dependencies>
 	<build>
