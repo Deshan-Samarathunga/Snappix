@@ -1,10 +1,10 @@
-// server/src/main/java/com/snappix/server/ServerApplication.java
 package com.snappix.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration; // ADD THIS IMPORT
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}) // MODIFY THIS LINE
 public class ServerApplication {
 
 	public static void main(String[] args) {
@@ -12,5 +12,3 @@ public class ServerApplication {
 	}
 
 }
-
-
