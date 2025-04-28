@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
-import './CreatePost.css'; // <-- use your new CSS
+import './Community.css';
 
 const topicsList = [
   "Filmmaking", "Photography", "Gear", "Editing", "Cinematic", "Analog",

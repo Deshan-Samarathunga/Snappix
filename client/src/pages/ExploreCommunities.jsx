@@ -9,6 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import './Community.css';
 
 export default function ExploreCommunities() {
   const [communities, setCommunities] = useState([]);
@@ -64,7 +65,6 @@ export default function ExploreCommunities() {
   const handleMenuClose = (id) => {
     setMenuAnchorEls(prev => ({ ...prev, [id]: null }));
   };
-
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this community?")) return;
     const token = localStorage.getItem("snappixSession");
@@ -75,87 +75,104 @@ export default function ExploreCommunities() {
       .catch(err => alert("Delete failed: " + (err.response?.data || err.message)));
     handleMenuClose(id);
   };
-
   const handleEdit = (id) => {
     navigate(`/edit-community/${id}`);
     handleMenuClose(id);
   };
 
   return (
-    <div className="bg-black text-white min-vh-100 overflow-hidden">
+    <>
       <Topbar />
-      <div className="d-flex">
-        <Sidebar />
-        <main className="flex-grow-1 px-5 pt-5" style={{ marginLeft: '280px', marginTop: '60px', backgroundColor: '#1a1a1b' }}>
-          <h2 className="fw-bold mb-4">Explore Communities</h2>
-          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            {communities.map(c => (
-              <div key={c.id} className="col">
-                <div className="bg-dark text-light p-3 rounded border border-secondary h-100 position-relative">
-                  <div className="d-flex align-items-center gap-3 mb-2">
-                    {c.iconUrl ? (
-                      <img src={c.iconUrl} alt={c.name} style={{ width: 40, height: 40, borderRadius: '50%' }} />
-                    ) : (
-                      <div className="bg-secondary rounded-circle" style={{ width: 40, height: 40 }} />
-                    )}
-                    <div>
-                      <h5 className="mb-0">{c.name}</h5>
-                      <small className="text-muted">{c.description}</small><br />
-                      <small className="text-muted">{c.members?.length || 0} members</small>
-                    </div>
-                    {/* Three-dot menu for creator */}
-                    {c.createdBy === user?.email && (
-                      <>
-                        <IconButton
-                          aria-label="more"
-                          aria-controls={`menu-${c.id}`}
-                          aria-haspopup="true"
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, c.id)}
-                          style={{ marginLeft: "auto", color: "white" }}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                        <Menu
-                          id={`menu-${c.id}`}
-                          anchorEl={menuAnchorEls[c.id]}
-                          open={Boolean(menuAnchorEls[c.id])}
-                          onClose={() => handleMenuClose(c.id)}
-                          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        >
-                          <MenuItem onClick={() => handleEdit(c.id)}>
-                            <EditIcon fontSize="small" style={{ marginRight: 8 }} />
-                            Edit
-                          </MenuItem>
-                          <MenuItem onClick={() => handleDelete(c.id)}>
-                            <DeleteIcon fontSize="small" style={{ marginRight: 8, color: "red" }} />
-                            Delete
-                          </MenuItem>
-                        </Menu>
-                      </>
-                    )}
+      <Sidebar />
+      <div className="explore-bg" style={{
+        marginLeft: 240,
+        padding: 40,
+        minHeight: "100vh",
+        background: "#181A1B"
+      }}>
+        <h2 style={{ marginBottom: 24, color: "#F3F6FA" }}>Explore Communities</h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 32 }}>
+          {communities.map(c => (
+            <div
+              key={c.id}
+              className="edit-community-container"
+              style={{
+                minWidth: 320,
+                maxWidth: 360,
+                marginBottom: 24,
+                position: "relative",
+                background: "#23272F",
+                color: "#F3F6FA",
+                border: "1.5px solid #222",
+                boxShadow: "0 2px 24px #0004"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "1.2rem",
+                      color: "#90caf9",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => navigate(`/c/${c.name}`)}>
+                    {c.name}
                   </div>
-                  <div className="d-flex justify-content-between align-items-center mt-2">
-                    {joined[c.name] ? (
-                      <button className="btn btn-sm btn-secondary" onClick={() => handleLeave(c.name)}>
-                        Joined
-                      </button>
-                    ) : (
-                      <button className="btn btn-sm btn-outline-info" onClick={() => handleJoin(c.name)}>
-                        Join
-                      </button>
-                    )}
-                    <button className="btn btn-sm btn-outline-light" onClick={() => navigate(`/c/${c.name}`)}>
-                      View
-                    </button>
+                  <div className="community-description">{c.description}</div>
+                  {c.topics?.length > 0 && (
+                    <div className="community-topics">
+                      {c.topics.map(topic => (
+                        <span className="community-topic-tag" key={topic}>{topic}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ color: "#B0B6C2", fontSize: "0.95rem", marginTop: 6 }}>
+                    {c.members?.length || 0} members
                   </div>
                 </div>
+                {(c.createdBy === user?.email) && (
+                  <div>
+                    <IconButton size="small" onClick={e => handleMenuOpen(e, c.id)}>
+                      <MoreVertIcon style={{ color: "#90caf9" }} />
+                    </IconButton>
+                    <Menu
+                      anchorEl={menuAnchorEls[c.id]}
+                      open={Boolean(menuAnchorEls[c.id])}
+                      onClose={() => handleMenuClose(c.id)}
+                    >
+                      <MenuItem onClick={() => handleEdit(c.id)}>
+                        <EditIcon fontSize="small" style={{ marginRight: 8 }} /> Edit
+                      </MenuItem>
+                      <MenuItem onClick={() => handleDelete(c.id)}>
+                        <DeleteIcon fontSize="small" style={{ marginRight: 8 }} /> Delete
+                      </MenuItem>
+                    </Menu>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </main>
+              <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
+                {joined[c.name] ? (
+                  <button className="save-btn" style={{ background: "#444" }} onClick={() => handleLeave(c.name)}>
+                    Leave
+                  </button>
+                ) : (
+                  <button className="save-btn" onClick={() => handleJoin(c.name)}>
+                    Join
+                  </button>
+                )}
+                <button
+                  className="topic-btn"
+                  style={{ background: "#23272F", color: "#90caf9", border: "1.5px solid #1976d2" }}
+                  onClick={() => navigate(`/c/${c.name}`)}
+                >
+                  View
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

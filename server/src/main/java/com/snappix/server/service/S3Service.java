@@ -13,7 +13,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.UUID;
 
 @Service
