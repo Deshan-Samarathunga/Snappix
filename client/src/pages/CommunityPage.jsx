@@ -7,10 +7,10 @@ import PostCard from '../components/PostCard';
 
 export default function CommunityPage() {
   const { name } = useParams();
-  const navigate = useNavigate();  // We need navigate for programmatic navigation
+  const navigate = useNavigate();
   const [community, setCommunity] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [courses, setCourses] = useState([]); 
+  const [courses, setCourses] = useState([]);
   const [error, setError] = useState(null);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [newCourse, setNewCourse] = useState({
@@ -20,11 +20,11 @@ export default function CommunityPage() {
     instructorEmail: '',
     mediaUrls: []
   });
+  const [activeTab, setActiveTab] = useState('posts');
 
   useEffect(() => {
     const token = localStorage.getItem("snappixSession");
 
-    // Fetch community
     axios.get(`http://localhost:8080/api/communities/name/${name}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -37,14 +37,12 @@ export default function CommunityPage() {
         setError("Community not found.");
       });
 
-    // Fetch posts
     axios.get(`http://localhost:8080/api/posts/community/${name}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => setPosts(res.data))
       .catch(err => console.error("Failed to load posts", err));
 
-    // Fetch courses
     axios.get(`http://localhost:8080/api/courses`, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -57,7 +55,7 @@ export default function CommunityPage() {
     const { name, value } = e.target;
     setNewCourse(prevState => ({
       ...prevState,
-      [name]: value // Only update the specific field
+      [name]: value
     }));
   };
 
@@ -69,8 +67,8 @@ export default function CommunityPage() {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
-        setCourses(prevCourses => [...prevCourses, res.data]);  // Add the new course to the courses list
-        setIsAddingCourse(false);  // Close the form after successful submission
+        setCourses(prevCourses => [...prevCourses, res.data]);
+        setIsAddingCourse(false);
         setNewCourse({
           title: '',
           description: '',
@@ -87,7 +85,6 @@ export default function CommunityPage() {
   };
 
   const handleViewCourse = (courseId) => {
-    // Navigate to the course details page for the selected course
     navigate(`/course/${courseId}`);
   };
 
@@ -145,116 +142,147 @@ export default function CommunityPage() {
 
           <hr className="border-secondary" />
 
-          {/* Add Course Button */}
-          <button className="btn btn-primary mb-3" onClick={() => setIsAddingCourse(!isAddingCourse)}>
-            {isAddingCourse ? 'Cancel' : 'Add Course'}
-          </button>
-
-          {/* Add Course Form */}
-          {isAddingCourse && (
-            <form onSubmit={handleCourseSubmit} className="bg-dark p-3 rounded mb-4">
-              <div className="mb-3">
-                <label htmlFor="title" className="form-label">Course Name:</label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  className="form-control"
-                  value={newCourse.title}
-                  onChange={handleCourseChange}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="description" className="form-label">Description:</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  className="form-control"
-                  value={newCourse.description}
-                  onChange={handleCourseChange}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="instructorName" className="form-label">Instructor Name:</label>
-                <input
-                  type="text"
-                  id="instructorName"
-                  name="instructorName"
-                  className="form-control"
-                  value={newCourse.instructorName}
-                  onChange={handleCourseChange}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="instructorEmail" className="form-label">Instructor Email:</label>
-                <input
-                  type="email"
-                  id="instructorEmail"
-                  name="instructorEmail"
-                  className="form-control"
-                  value={newCourse.instructorEmail}
-                  onChange={handleCourseChange}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="mediaUrls" className="form-label">Media URLs (comma separated):</label>
-                <input
-                  type="text"
-                  id="mediaUrls"
-                  name="mediaUrls"
-                  className="form-control"
-                  value={newCourse.mediaUrls.join(', ')}
-                  onChange={(e) => setNewCourse(prevState => ({
-                    ...prevState,
-                    mediaUrls: e.target.value.split(',').map(url => url.trim())
-                  }))}
-                />
-              </div>
-
-              <button type="submit" className="btn btn-success">Add Course</button>
-            </form>
-          )}
-
-          <hr className="border-secondary" />
-
-          {/* COURSES SECTION */}
-          <h5 className="mb-3">Courses</h5>
-          {communityCourses.length === 0 ? (
-            <p className="text-light">No courses available for this community yet.</p>
-          ) : (
-            <ul className="list-group mb-4">
-              {communityCourses.map(course => (
-                <li key={course.id} className="list-group-item bg-dark text-light">
-                  {course.title}
-                  <button
-                    className="btn btn-info ms-2"
-                    onClick={() => handleViewCourse(course.id)} // View Course button
-                  >
-                    View Course
-                  </button>
-                </li>
-              ))}
+          {/* Tabs */}
+          <div className="d-flex justify-content-center mb-3">
+            <ul className="nav nav-tabs">
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === 'posts' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('posts')}
+                >
+                  Posts
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === 'courses' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('courses')}
+                >
+                  Courses
+                </button>
+              </li>
             </ul>
+          </div>
+
+          {/* Content */}
+          {activeTab === 'courses' && (
+            <>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="mb-0">Courses</h5>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setIsAddingCourse(!isAddingCourse)}
+                >
+                  {isAddingCourse ? 'Cancel' : '✚'}
+                </button>
+              </div>
+
+              {isAddingCourse && (
+                <form onSubmit={handleCourseSubmit} className="bg-dark p-3 rounded mb-4">
+                  <div className="mb-3">
+                    <label htmlFor="title" className="form-label">Course Name:</label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      className="form-control"
+                      value={newCourse.title}
+                      onChange={handleCourseChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="description" className="form-label">Description:</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      className="form-control"
+                      value={newCourse.description}
+                      onChange={handleCourseChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="instructorName" className="form-label">Instructor Name:</label>
+                    <input
+                      type="text"
+                      id="instructorName"
+                      name="instructorName"
+                      className="form-control"
+                      value={newCourse.instructorName}
+                      onChange={handleCourseChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="instructorEmail" className="form-label">Instructor Email:</label>
+                    <input
+                      type="email"
+                      id="instructorEmail"
+                      name="instructorEmail"
+                      className="form-control"
+                      value={newCourse.instructorEmail}
+                      onChange={handleCourseChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="mediaUrls" className="form-label">Media URLs (comma separated):</label>
+                    <input
+                      type="text"
+                      id="mediaUrls"
+                      name="mediaUrls"
+                      className="form-control"
+                      value={newCourse.mediaUrls.join(', ')}
+                      onChange={(e) => setNewCourse(prevState => ({
+                        ...prevState,
+                        mediaUrls: e.target.value.split(',').map(url => url.trim())
+                      }))}
+                    />
+                  </div>
+
+                  <button type="submit" className="btn btn-success">Add Course</button>
+                </form>
+              )}
+
+              <hr className="border-secondary" />
+
+              {communityCourses.length === 0 ? (
+                <p className="text-light">No courses available for this community yet.</p>
+              ) : (
+                <ul className="list-group mb-4">
+                  {communityCourses.map(course => (
+                    <li key={course.id} className="list-group-item bg-dark text-light">
+                      {course.title}
+                      <button
+                        className="btn btn-info ms-2"
+                        onClick={() => handleViewCourse(course.id)}
+                      >
+                        View Course ➡️
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
 
-          <hr className="border-secondary" />
-
-          {/* POSTS SECTION */}
-          <h5 className="mb-3">Posts</h5>
-          {posts.length === 0 ? (
-            <p className="text-light">No posts in this community yet.</p>
-          ) : (
-            posts.map(post => (
-              <PostCard key={post.id} post={post} location="community" />
-            ))
+          {activeTab === 'posts' && (
+            <>
+              <hr className="border-secondary" />
+              <h5 className="mb-3">Posts</h5>
+              {posts.length === 0 ? (
+                <p className="text-light">No posts in this community yet.</p>
+              ) : (
+                posts.map(post => (
+                  <PostCard key={post.id} post={post} location="community" />
+                ))
+              )}
+            </>
           )}
         </div>
       </div>
