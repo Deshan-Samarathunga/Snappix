@@ -10,6 +10,7 @@ export default function CourseDetailPage() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isCommunityMember, setIsCommunityMember] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -19,6 +20,10 @@ export default function CourseDetailPage() {
   });
 
   useEffect(() => {
+    // Check if user is a community member
+    const role = localStorage.getItem("snappixRole");
+    setIsCommunityMember(role === "community_member");
+
     const token = localStorage.getItem("snappixSession");
     axios.get(`http://localhost:8080/api/courses/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -55,6 +60,10 @@ export default function CourseDetailPage() {
           alert("Failed to delete course.");
         });
     }
+  };
+
+  const handleEnroll = () => {
+    alert("You have been enrolled in the course!");
   };
 
   const handleEditChange = (e) => {
@@ -122,61 +131,11 @@ export default function CourseDetailPage() {
                   <h3 className="card-title text-primary fw-bold">Edit Course</h3>
                   <div className="mb-3">
                     <label className="form-label">Course Title</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleEditChange}
-                      required
-                    />
+                    <input type="text" className="form-control" name="title" value={formData.title} onChange={handleEditChange} required />
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Description</label>
-                    <textarea
-                      className="form-control"
-                      name="description"
-                      rows="3"
-                      value={formData.description}
-                      onChange={handleEditChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Instructor Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="instructorName"
-                      value={formData.instructorName}
-                      onChange={handleEditChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Instructor Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      name="instructorEmail"
-                      value={formData.instructorEmail}
-                      onChange={handleEditChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Media URLs (comma separated)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.mediaUrls.join(', ')}
-                      onChange={(e) =>
-                        setFormData(prev => ({
-                          ...prev,
-                          mediaUrls: e.target.value.split(',').map(url => url.trim())
-                        }))
-                      }
-                    />
+                    <textarea className="form-control" name="description" rows="3" value={formData.description} onChange={handleEditChange} required />
                   </div>
                   <button type="submit" className="btn btn-success me-2">💾 Save</button>
                   <button type="button" className="btn btn-secondary" onClick={() => setIsEditing(false)}>❌ Cancel</button>
@@ -188,22 +147,12 @@ export default function CourseDetailPage() {
                   <p className="card-text"><strong>Instructor:</strong> {course.instructorName}</p>
                   <p className="card-text"><strong>Email:</strong> {course.instructorEmail}</p>
 
-                  {course.mediaUrls?.length > 0 && (
-                    <div className="mt-4">
-                      <h5 className="text-warning">Media</h5>
-                      <div className="row">
-                        {course.mediaUrls.map((url, idx) => (
-                          <div className="col-md-4 mb-3" key={idx}>
-                            <img src={url} alt={`media-${idx}`} className="img-fluid rounded shadow" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   <div className="mt-4">
-                    <button className="btn btn-outline-warning me-2" onClick={() => setIsEditing(true)}>✏️</button>
-                    <button className="btn btn-outline-danger" onClick={handleDelete}>🗑️</button>
+                    {isCommunityMember && (
+                      <button className="btn btn-outline-success me-2" onClick={handleEnroll}>🚀 Enroll Me</button>
+                    )}
+                    <button className="btn btn-outline-warning me-2" onClick={() => setIsEditing(true)}>✏️ Edit</button>
+                    <button className="btn btn-outline-danger" onClick={handleDelete}>🗑️ Delete</button>
                   </div>
                 </>
               )}
