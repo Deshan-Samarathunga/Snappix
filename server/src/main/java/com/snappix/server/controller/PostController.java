@@ -1,8 +1,7 @@
+// src/main/java/com/snappix/server/controller/PostController.java
 package com.snappix.server.controller;
 
-import com.snappix.server.model.Community;
 import com.snappix.server.model.Post;
-import com.snappix.server.repository.CommunityRepository;
 import com.snappix.server.repository.PostRepository;
 import com.snappix.server.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,6 @@ public class PostController {
 
     @Autowired
     private PostRepository postRepo;
-
-    @Autowired
-    private CommunityRepository communityRepo;
 
     @Autowired
     private S3Service s3Service;
@@ -72,28 +68,15 @@ public class PostController {
 
         Post post = optionalPost.get();
 
-        // --- Moderator Delete Logic ---
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Community> communityOpt = communityRepo.findByNameIgnoreCase(post.getCommunity());
-        if (communityOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("Community not found");
-        }
-        Community community = communityOpt.get();
-
-        boolean isPostAuthor = post.getCreatedBy().equalsIgnoreCase(email);
-        boolean isCommunityCreator = community.getCreatedBy().equalsIgnoreCase(email);
-
-        if (!isPostAuthor && !isCommunityCreator) {
-            return ResponseEntity.status(403).body("Only the post author or community creator can delete this post");
-        }
-        // --- End Moderator Delete Logic ---
-
         try {
+            // Delete media files from S3
             if (post.getMediaUrls() != null) {
                 for (String url : post.getMediaUrls()) {
                     s3Service.deleteFileByUrl(url);
                 }
             }
+
+            // Delete the post document
             postRepo.deleteById(id);
             return ResponseEntity.ok("Post deleted successfully");
         } catch (Exception e) {
@@ -123,4 +106,5 @@ public class PostController {
         postRepo.save(post);
         return ResponseEntity.ok("Post updated successfully");
     }
+
 }

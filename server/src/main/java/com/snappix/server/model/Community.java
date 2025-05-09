@@ -1,3 +1,4 @@
+// src/main/java/com/snappix/server/model/Community.java
 package com.snappix.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,10 +23,8 @@ public class Community {
     private List<String> topics;
     private String createdBy;
 
+    // ✅ Members list
     private List<String> members = new ArrayList<>();
-
-    // Moderators field and getter/setter
-    private List<String> moderators = new ArrayList<>();
 
     public Community() {}
 
@@ -35,42 +34,74 @@ public class Community {
         this.iconUrl = iconUrl;
     }
 
-    public String getId() { return id; }
+    // ✅ Getters and Setters
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getId() {
+        return id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getIconUrl() { return iconUrl; }
-    public void setIconUrl(String iconUrl) { this.iconUrl = iconUrl; }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public String getBannerUrl() { return bannerUrl; }
-    public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
+    public String getIconUrl() {
+        return iconUrl;
+    }
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
 
-    public List<String> getTopics() { return topics; }
-    public void setTopics(List<String> topics) { this.topics = topics; }
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+    public void setBannerUrl(String bannerUrl) {
+        this.bannerUrl = bannerUrl;
+    }
 
-    public String getCreatedBy() { return createdBy; }
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public List<String> getTopics() {
+        return topics;
+    }
+    public void setTopics(List<String> topics) {
+        this.topics = topics;
+    }
 
-    public List<String> getMembers() { return members; }
-    public void setMembers(List<String> members) { this.members = members; }
+    public String getCreatedBy() {
+        return createdBy;
+    }
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
-    // Moderators getter/setter
-    public List<String> getModerators() { return moderators; }
-    public void setModerators(List<String> moderators) { this.moderators = moderators; }
+    public List<String> getMembers() {
+        return members;
+    }
+    public void setMembers(List<String> members) {
+        this.members = members;
+    }
 
-    public int getMemberCount() { return members == null ? 0 : members.size(); }
+    // ✅ Dynamic member count for display
+    public int getMemberCount() {
+        return members == null ? 0 : members.size();
+    }
 
+    // ✅ Parse JSON array string to List<String>
     @JsonIgnore
     public void setTopicsFromJson(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             this.topics = mapper.readValue(json, new TypeReference<List<String>>() {});
         } catch (Exception e) {
-            this.topics = List.of();
+            this.topics = List.of(); // fallback to empty
         }
     }
 }

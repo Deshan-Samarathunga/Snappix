@@ -1,3 +1,4 @@
+// src/main/java/com/snappix/server/model/Post.java
 package com.snappix.server.model;
 
 import org.springframework.data.annotation.Id;
@@ -12,10 +13,8 @@ public class Post {
     @Id
     private String id;
 
-    // Use this for post author checks
-    private String createdBy;
-
-    private String userName;
+    private String userEmail;
+    private String userName; // ✅ added
     private String community;
     private String description;
     private List<String> mediaUrls;
@@ -23,8 +22,8 @@ public class Post {
 
     public Post() {}
 
-    public Post(String createdBy, String userName, String community, String description, List<String> mediaUrls) {
-        this.createdBy = createdBy;
+    public Post(String userEmail, String userName, String community, String description, List<String> mediaUrls) {
+        this.userEmail = userEmail;
         this.userName = userName;
         this.community = community;
         this.description = description;
@@ -33,8 +32,8 @@ public class Post {
 
     public String getId() { return id; }
 
-    public String getCreatedBy() { return createdBy; }
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
 
     public String getUserName() { return userName; }
     public void setUserName(String userName) { this.userName = userName; }
