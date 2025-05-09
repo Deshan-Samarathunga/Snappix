@@ -142,8 +142,6 @@ export default function CommunityPage() {
 
           <hr className="border-secondary" />
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
           {/* Tabs */}
           <div className="d-flex justify-content-center mb-3">
             <ul className="nav nav-tabs">
@@ -178,39 +176,6 @@ export default function CommunityPage() {
                   {isAddingCourse ? 'Cancel' : '✚'}
                 </button>
               </div>
-=======
-=======
->>>>>>> Stashed changes
-          {/* Tabs for Posts and Courses */}
-          <ul className="nav nav-tabs mb-3">
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeTab === 'posts' ? 'active' : ''}`}
-                onClick={() => setActiveTab('posts')}
-              >
-                Posts
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeTab === 'courses' ? 'active' : ''}`}
-                onClick={() => setActiveTab('courses')}
-              >
-                Courses
-              </button>
-            </li>
-          </ul>
-
-          {/* CONTENT BASED ON TAB */}
-          {activeTab === 'courses' ? (
-            <>
-              <button className="btn btn-primary mb-3" onClick={() => setIsAddingCourse(!isAddingCourse)}>
-                {isAddingCourse ? 'Cancel' : 'Add Course'}
-              </button>
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
               {isAddingCourse && (
                 <form onSubmit={handleCourseSubmit} className="bg-dark p-3 rounded mb-4">
@@ -284,16 +249,8 @@ export default function CommunityPage() {
                 </form>
               )}
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
               <hr className="border-secondary" />
 
-=======
-              <h5 className="mb-3">Courses</h5>
->>>>>>> Stashed changes
-=======
-              <h5 className="mb-3">Courses</h5>
->>>>>>> Stashed changes
               {communityCourses.length === 0 ? (
                 <p className="text-light">No courses available for this community yet.</p>
               ) : (
@@ -305,23 +262,13 @@ export default function CommunityPage() {
                         className="btn btn-info ms-2"
                         onClick={() => handleViewCourse(course.id)}
                       >
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
                         View Course ➡️
-=======
-                        View Course
->>>>>>> Stashed changes
-=======
-                        View Course
->>>>>>> Stashed changes
                       </button>
                     </li>
                   ))}
                 </ul>
               )}
             </>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
           )}
 
           {activeTab === 'posts' && (
@@ -337,36 +284,6 @@ export default function CommunityPage() {
               )}
             </>
           )}
-=======
-          ) : (
-            <>
-              <h5 className="mb-3">Posts</h5>
-              {posts.length === 0 ? (
-                <p className="text-light">No posts in this community yet.</p>
-              ) : (
-                posts.map(post => (
-                  <PostCard key={post.id} post={post} location="community" />
-                ))
-              )}
-            </>
-          )}
-
->>>>>>> Stashed changes
-=======
-          ) : (
-            <>
-              <h5 className="mb-3">Posts</h5>
-              {posts.length === 0 ? (
-                <p className="text-light">No posts in this community yet.</p>
-              ) : (
-                posts.map(post => (
-                  <PostCard key={post.id} post={post} location="community" />
-                ))
-              )}
-            </>
-          )}
-
->>>>>>> Stashed changes
         </div>
       </div>
     </div>
