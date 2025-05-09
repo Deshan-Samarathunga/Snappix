@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
+import { useDispatch } from 'react-redux';
+import { addPost, setStatus, setError } from '../redux/postSlice';
 
 export default function CreatePost() {
   const [activeTab, setActiveTab] = useState('text');
@@ -15,6 +17,7 @@ export default function CreatePost() {
   const [community, setCommunity] = useState('');
   const [userCommunities, setUserCommunities] = useState([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("snappixSession");
@@ -38,26 +41,31 @@ export default function CreatePost() {
     }
 
     const formData = new FormData();
-    formData.append("userName", JSON.parse(localStorage.getItem("snappixUser")).name);
+    const user = JSON.parse(localStorage.getItem("snappixUser"));
+    formData.append("userName", user.name);
     formData.append("description", title + '\n' + body);
     formData.append("community", community.trim());
     media.forEach((file) => formData.append("media", file));
 
     try {
       const token = localStorage.getItem("snappixSession");
-      await axios.post("http://localhost:8080/api/posts/create", formData, {
+      dispatch(setStatus("loading"));
+
+      const res = await axios.post("http://localhost:8080/api/posts/create", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
+
+      dispatch(addPost(res.data));
+      dispatch(setStatus("success"));
       toast.success("✅ Post uploaded!");
       setTimeout(() => navigate("/profile"), 1500);
     } catch (err) {
-      console.error("Upload error:", err.response?.data || err.message);
+      dispatch(setError(err.response?.data || "Unknown error"));
       toast.error("❌ Upload failed: " + (err.response?.data || "Unknown error"));
     }
-
   };
 
   return (
@@ -65,8 +73,7 @@ export default function CreatePost() {
       <Topbar />
       <div className="d-flex">
         <Sidebar />
-        <main
-          className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center"
+        <main className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center"
           style={{
             marginLeft: '280px',
             marginTop: '60px',
@@ -107,7 +114,6 @@ export default function CreatePost() {
             </ul>
 
             <form onSubmit={handleSubmit}>
-              {/* Title */}
               <div className="mb-3">
                 <input
                   type="text"
@@ -121,7 +127,6 @@ export default function CreatePost() {
                 <small className="text-muted">{title.length}/300</small>
               </div>
 
-              {/* Media Upload */}
               {activeTab === 'media' && (
                 <div className="mb-3 border border-secondary rounded p-5 text-center text-muted" style={{ borderStyle: 'dashed' }}>
                   <p className="mb-0">Drag and Drop images or</p>
@@ -135,7 +140,6 @@ export default function CreatePost() {
                 </div>
               )}
 
-              {/* Video Upload */}
               {activeTab === 'video' && (
                 <div className="mb-3 border border-secondary rounded p-5 text-center text-muted" style={{ borderStyle: 'dashed' }}>
                   <p className="mb-0">Upload video or drag and drop</p>
@@ -149,7 +153,6 @@ export default function CreatePost() {
                 </div>
               )}
 
-              {/* Text Area */}
               {(activeTab === 'text' || activeTab === 'media' || activeTab === 'video') && (
                 <div className="mb-3">
                   <textarea
