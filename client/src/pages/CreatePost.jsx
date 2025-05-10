@@ -61,11 +61,12 @@ export default function CreatePost() {
       dispatch(addPost(res.data));
       dispatch(setStatus("success"));
       toast.success("✅ Post uploaded!");
-      setTimeout(() => navigate("/profile"), 1500);
+      navigate(`/c/${community.trim()}`); // redirect to community page
     } catch (err) {
       dispatch(setError(err.response?.data || "Unknown error"));
       toast.error("❌ Upload failed: " + (err.response?.data || "Unknown error"));
     }
+
   };
 
   return (
