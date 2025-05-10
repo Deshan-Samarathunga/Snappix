@@ -20,7 +20,9 @@ function App() {
   return (
     <>
       <Router>
-        <SessionManager /> {/* ⏱️ Inactivity auto logout + silent refresh on load */}
+        {/* Manages auto logout & refresh token logic */}
+        <SessionManager />
+
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
@@ -31,6 +33,8 @@ function App() {
           <Route path="/edit-post/:id" element={<EditPost />} />
         </Routes>
       </Router>
+
+      {/* Global toast message container */}
       <ToastContainer position="top-center" autoClose={2500} />
     </>
   );
