@@ -9,12 +9,15 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import './Community.css';
 
 export default function ExploreCommunities() {
   const [communities, setCommunities] = useState([]);
   const [joined, setJoined] = useState({});
   const [menuAnchorEls, setMenuAnchorEls] = useState({});
+  const [sortBy, setSortBy] = useState('members');
+  const [search, setSearch] = useState('');
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("snappixUser"));
 
@@ -36,7 +39,8 @@ export default function ExploreCommunities() {
       .catch(err => console.error("Error loading communities", err));
   }, [user?.email]);
 
-  const handleJoin = (name) => {
+  const handleJoin = (name, e) => {
+    e.stopPropagation();
     const token = localStorage.getItem("snappixSession");
     axios.post(`http://localhost:8080/api/communities/join/${name}`, {}, {
       headers: { Authorization: `Bearer ${token}` }
@@ -45,7 +49,8 @@ export default function ExploreCommunities() {
       .catch(err => alert("Join failed: " + (err.response?.data || err.message)));
   };
 
-  const handleLeave = (name) => {
+  const handleLeave = (name, e) => {
+    e.stopPropagation();
     const token = localStorage.getItem("snappixSession");
     axios.post(`http://localhost:8080/api/communities/leave/${name}`, {}, {
       headers: { Authorization: `Bearer ${token}` }
@@ -60,11 +65,14 @@ export default function ExploreCommunities() {
 
   // Menu logic
   const handleMenuOpen = (event, id) => {
+    event.stopPropagation();
     setMenuAnchorEls(prev => ({ ...prev, [id]: event.currentTarget }));
   };
+
   const handleMenuClose = (id) => {
     setMenuAnchorEls(prev => ({ ...prev, [id]: null }));
   };
+
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this community?")) return;
     const token = localStorage.getItem("snappixSession");
@@ -75,104 +83,141 @@ export default function ExploreCommunities() {
       .catch(err => alert("Delete failed: " + (err.response?.data || err.message)));
     handleMenuClose(id);
   };
+
   const handleEdit = (id) => {
     navigate(`/edit-community/${id}`);
     handleMenuClose(id);
   };
 
+  const handleSortChange = (criteria) => setSortBy(criteria);
+
+  // Sorting and searching
+  const filteredCommunities = communities
+    .filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (sortBy === 'members') {
+        return (b.members?.length || 0) - (a.members?.length || 0);
+      } else if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'date') {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return 0;
+    });
+
+  // Avatar letter
+  const getLetterAvatar = (name) => {
+    const letter = name.charAt(0).toUpperCase();
+    return (
+      <div className="community-letter">{letter}</div>
+    );
+  };
+
   return (
-    <>
+    <div className="app-container">
       <Topbar />
-      <Sidebar />
-      <div className="explore-bg" style={{
-        marginLeft: 240,
-        padding: 40,
-        minHeight: "100vh",
-        background: "#181A1B"
-      }}>
-        <h2 style={{ marginBottom: 24, color: "#F3F6FA" }}>Explore Communities</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 32 }}>
-          {communities.map(c => (
-            <div
-              key={c.id}
-              className="edit-community-container"
-              style={{
-                minWidth: 320,
-                maxWidth: 360,
-                marginBottom: 24,
-                position: "relative",
-                background: "#23272F",
-                color: "#F3F6FA",
-                border: "1.5px solid #222",
-                boxShadow: "0 2px 24px #0004"
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <div
-                    style={{
-                      fontWeight: 700,
-                      fontSize: "1.2rem",
-                      color: "#90caf9",
-                      cursor: "pointer"
-                    }}
-                    onClick={() => navigate(`/c/${c.name}`)}>
-                    {c.name}
-                  </div>
-                  <div className="community-description">{c.description}</div>
-                  {c.topics?.length > 0 && (
-                    <div className="community-topics">
-                      {c.topics.map(topic => (
-                        <span className="community-topic-tag" key={topic}>{topic}</span>
-                      ))}
-                    </div>
-                  )}
-                  <div style={{ color: "#B0B6C2", fontSize: "0.95rem", marginTop: 6 }}>
-                    {c.members?.length || 0} members
-                  </div>
-                </div>
-                {(c.createdBy === user?.email) && (
-                  <div>
-                    <IconButton size="small" onClick={e => handleMenuOpen(e, c.id)}>
-                      <MoreVertIcon style={{ color: "#90caf9" }} />
-                    </IconButton>
-                    <Menu
-                      anchorEl={menuAnchorEls[c.id]}
-                      open={Boolean(menuAnchorEls[c.id])}
-                      onClose={() => handleMenuClose(c.id)}
-                    >
-                      <MenuItem onClick={() => handleEdit(c.id)}>
-                        <EditIcon fontSize="small" style={{ marginRight: 8 }} /> Edit
-                      </MenuItem>
-                      <MenuItem onClick={() => handleDelete(c.id)}>
-                        <DeleteIcon fontSize="small" style={{ marginRight: 8 }} /> Delete
-                      </MenuItem>
-                    </Menu>
-                  </div>
-                )}
-              </div>
-              <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
-                {joined[c.name] ? (
-                  <button className="save-btn" style={{ background: "#444" }} onClick={() => handleLeave(c.name)}>
-                    Leave
-                  </button>
-                ) : (
-                  <button className="save-btn" onClick={() => handleJoin(c.name)}>
-                    Join
-                  </button>
-                )}
+      <div className="main-layout">
+        <Sidebar />
+        <div className="content-area">
+          <div className="communities-container">
+            <h1 className="communities-heading">Communities</h1>
+            <p className="communities-subheading">Discover and join communities based on your interests</p>
+            <div className="communities-search-sort">
+              <input
+                type="text"
+                placeholder="Search communities..."
+                className="communities-search"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              <div className="sort-options">
+                <span>Sort by:</span>
                 <button
-                  className="topic-btn"
-                  style={{ background: "#23272F", color: "#90caf9", border: "1.5px solid #1976d2" }}
-                  onClick={() => navigate(`/c/${c.name}`)}
-                >
-                  View
-                </button>
+                  className={`sort-btn ${sortBy === 'members' ? 'active' : ''}`}
+                  onClick={() => handleSortChange('members')}
+                >Members</button>
+                <button
+                  className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
+                  onClick={() => handleSortChange('name')}
+                >Name</button>
+                <button
+                  className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
+                  onClick={() => handleSortChange('date')}
+                >Date</button>
               </div>
             </div>
-          ))}
+            <div className="community-grid">
+              {filteredCommunities.map(community => (
+                <div
+                  key={community.id}
+                  className="community-card"
+                  onClick={() => navigate(`/c/${community.name}`)}
+                >
+                  <div className="community-card-header">
+                    {getLetterAvatar(community.name)}
+                    <h3 className="community-name">c/{community.name}</h3>
+                    {/* Dropdown for edit/delete if user is creator */}
+                    {user && community.createdBy === user.email && (
+                      <div className="menu-container" onClick={e => e.stopPropagation()}>
+                        <IconButton
+                          size="small"
+                          onClick={e => handleMenuOpen(e, community.id)}
+                          className="more-options-btn"
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                        <Menu
+                          anchorEl={menuAnchorEls[community.id]}
+                          open={Boolean(menuAnchorEls[community.id])}
+                          onClose={() => handleMenuClose(community.id)}
+                        >
+                          <MenuItem onClick={() => handleEdit(community.id)}>
+                            <EditIcon fontSize="small" style={{ marginRight: 8 }} />
+                            Edit
+                          </MenuItem>
+                          <MenuItem onClick={() => handleDelete(community.id)}>
+                            <DeleteIcon fontSize="small" style={{ marginRight: 8, color: '#d32f2f' }} />
+                            <span style={{ color: '#d32f2f' }}>Delete</span>
+                          </MenuItem>
+                        </Menu>
+                      </div>
+                    )}
+                  </div>
+                  <p className="community-description">
+                    {community.description && community.description.trim()
+                      ? community.description
+                      : <span style={{ color: '#B0B6C2', fontStyle: 'italic' }}>No Description</span>
+                    }
+                  </p>
+                  <div className="community-meta">
+                    <PeopleAltIcon style={{ fontSize: 18, verticalAlign: 'middle', marginRight: 4 }} />
+                    <span>{community.members?.length || 0} members</span>
+                  </div>
+                  <div className="community-actions">
+                    {user && (
+                      joined[community.name] ? (
+                        <button
+                          className="leave-btn"
+                          onClick={e => handleLeave(community.name, e)}
+                        >Leave</button>
+                      ) : (
+                        <button
+                          className="join-btn"
+                          onClick={e => handleJoin(community.name, e)}
+                        >Join</button>
+                      )
+                    )}
+                    <button
+                      className="visit-btn"
+                      onClick={e => { e.stopPropagation(); navigate(`/c/${community.name}`); }}
+                    >Visit</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

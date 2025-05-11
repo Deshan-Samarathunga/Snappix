@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Document(collection = "communities")
@@ -22,10 +23,10 @@ public class Community {
     private String bannerUrl;
     private List<String> topics;
     private String createdBy;
-
-    // ✅ Members list
+    private List<String> moderators = new ArrayList<>();
     private List<String> members = new ArrayList<>();
-
+    private Date createdAt;
+    
     public Community() {}
 
     public Community(String name, String description, String iconUrl) {
@@ -34,7 +35,7 @@ public class Community {
         this.iconUrl = iconUrl;
     }
 
-    // ✅ Getters and Setters
+    //Getters and Setters
 
     public String getId() {
         return id;
@@ -88,20 +89,32 @@ public class Community {
     public void setMembers(List<String> members) {
         this.members = members;
     }
+    
+    public List<String> getModerators() {
+        return moderators;
+    }
+    public void setModerators(List<String> moderators) {
+        this.moderators = moderators;
+    }
+    
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 
-    // ✅ Dynamic member count for display
     public int getMemberCount() {
         return members == null ? 0 : members.size();
     }
 
-    // ✅ Parse JSON array string to List<String>
     @JsonIgnore
     public void setTopicsFromJson(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             this.topics = mapper.readValue(json, new TypeReference<List<String>>() {});
         } catch (Exception e) {
-            this.topics = List.of(); // fallback to empty
+            this.topics = List.of();
         }
     }
 }

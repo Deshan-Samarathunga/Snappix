@@ -20,6 +20,8 @@ export default function EditCommunity() {
   const [description, setDescription] = useState('');
   const [icon, setIcon] = useState(null);
   const [banner, setBanner] = useState(null);
+  const [iconPreview, setIconPreview] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
   const [selectedTopics, setSelectedTopics] = useState([]);
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export default function EditCommunity() {
         setName(res.data.name);
         setDescription(res.data.description);
         setSelectedTopics(res.data.topics || []);
+        setIconPreview(res.data.iconUrl || null);
+        setBannerPreview(res.data.bannerUrl || null);
         setLoading(false);
       })
       .catch(err => {
@@ -49,6 +53,18 @@ export default function EditCommunity() {
     );
   };
 
+  const handleIconChange = e => {
+    const file = e.target.files[0];
+    setIcon(file);
+    setIconPreview(file ? URL.createObjectURL(file) : null);
+  };
+
+  const handleBannerChange = e => {
+    const file = e.target.files[0];
+    setBanner(file);
+    setBannerPreview(file ? URL.createObjectURL(file) : null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -59,14 +75,12 @@ export default function EditCommunity() {
       formData.append("topics", JSON.stringify(selectedTopics));
       if (icon) formData.append("icon", icon);
       if (banner) formData.append("banner", banner);
-
       await axios.put(`http://localhost:8080/api/communities/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
-
       toast.success("✅ Community updated!");
       setTimeout(() => navigate(`/c/${name}`), 1000);
     } catch (err) {
@@ -76,81 +90,77 @@ export default function EditCommunity() {
 
   if (loading) {
     return (
-      <>
+      <div className="app-container">
         <Topbar />
-        <Sidebar />
-        <div style={{ marginLeft: 240, padding: 40 }}>Loading...</div>
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <>
-        <Topbar />
-        <Sidebar />
-        <div style={{ marginLeft: 240, padding: 40, color: "red" }}>{error}</div>
-      </>
+        <div className="main-layout">
+          <Sidebar />
+          <div className="content-area">
+            <div className="loading-container">Loading community...</div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="app-container">
       <Topbar />
-      <Sidebar />
-      <div style={{ marginLeft: 240, padding: 40 }}>
-        <div className="edit-community-container">
-          <h2>Edit Community</h2>
-          <form onSubmit={handleSubmit} encType="multipart/form-data">
-            <label className="form-label">Name:</label>
-            <input
-              type="text"
-              className="form-control"
-              value={name}
-              maxLength={30}
-              onChange={e => setName(e.target.value)}
-              required
-            />
-            <label className="form-label">Description:</label>
-            <textarea
-              className="form-control"
-              value={description}
-              maxLength={200}
-              onChange={e => setDescription(e.target.value)}
-              required
-              rows={3}
-            />
-            <label className="form-label">Topics (up to 3):</label>
-            <div className="topic-btn-group">
-              {topicsList.map(topic => (
-                <button
-                  key={topic}
-                  type="button"
-                  className={`topic-btn${selectedTopics.includes(topic) ? " selected" : ""}`}
-                  onClick={() => toggleTopic(topic)}
-                >
-                  {topic}
-                </button>
-              ))}
-            </div>
-            <label className="form-label">Icon (optional):</label>
-            <input
-              type="file"
-              accept="image/*"
-              className="form-control"
-              onChange={e => setIcon(e.target.files[0])}
-            />
-            <label className="form-label">Banner (optional):</label>
-            <input
-              type="file"
-              accept="image/*"
-              className="form-control"
-              onChange={e => setBanner(e.target.files[0])}
-            />
-            <button type="submit" className="save-btn">Save Changes</button>
-          </form>
+      <div className="main-layout">
+        <Sidebar />
+        <div className="content-area">
+          <div className="edit-community-container">
+            <h2>Edit Community</h2>
+            {error && <div className="error-container">{error}</div>}
+            <form onSubmit={handleSubmit} autoComplete="off">
+              <label className="form-label">Name:</label>
+              <input
+                className="form-control"
+                type="text"
+                value={name}
+                disabled
+              />
+
+              <label className="form-label">Description:</label>
+              <textarea
+                className="form-control"
+                rows={3}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Describe your community"
+                maxLength={300}
+              />
+
+              <label className="form-label">Topics (up to 3):</label>
+              <div className="topic-btn-group">
+                {topicsList.map(topic => (
+                  <button
+                    type="button"
+                    key={topic}
+                    className={`topic-btn${selectedTopics.includes(topic) ? " selected" : ""}`}
+                    onClick={() => toggleTopic(topic)}
+                  >
+                    {topic}
+                  </button>
+                ))}
+              </div>
+
+              <label className="form-label">Icon (optional):</label>
+              <input className="form-control" type="file" accept="image/*" onChange={handleIconChange} />
+              {iconPreview && (
+                <img src={iconPreview} alt="icon preview" style={{ width: 48, height: 48, borderRadius: 12, margin: '8px 0' }} />
+              )}
+
+              <label className="form-label">Banner (optional):</label>
+              <input className="form-control" type="file" accept="image/*" onChange={handleBannerChange} />
+              {bannerPreview && (
+                <img src={bannerPreview} alt="banner preview" style={{ width: '100%', maxHeight: 80, borderRadius: 10, margin: '8px 0' }} />
+              )}
+
+              <button className="save-btn" type="submit">Save Changes</button>
+            </form>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

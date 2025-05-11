@@ -2,6 +2,7 @@ package com.snappix.server.controller;
 
 import com.snappix.server.model.Community;
 import com.snappix.server.repository.CommunityRepository;
+import com.snappix.server.service.OnlineUserTracker;
 import com.snappix.server.service.S3Service;
 import com.snappix.server.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/communities")
@@ -24,6 +24,9 @@ public class CommunityController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private OnlineUserTracker onlineTracker;
 
     // Get all communities
     @GetMapping
@@ -41,18 +44,28 @@ public class CommunityController {
 
     // Get a community by name
     @GetMapping("/name/{name}")
-    public ResponseEntity<Object> getCommunityByName(@PathVariable String name) {
+    public ResponseEntity<?> getCommunityByName(@PathVariable String name) {
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
-        return found.<ResponseEntity<Object>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(404).body("Community not found"));
+        if (found.isPresent()) {
+            Community community = found.get();
+            Map<String, Object> response = new HashMap<>();
+            response.put("community", community);
+            response.put("onlineCount", onlineTracker.getOnlineCount(name));
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(404).body("Community not found");
     }
 
-    // *** ADD THIS ENDPOINT ***
+    // Get a community by id
     @GetMapping("/{id}")
     public ResponseEntity<?> getCommunityById(@PathVariable String id) {
         Optional<Community> found = communityRepo.findById(id);
         if (found.isPresent()) {
-            return ResponseEntity.ok(found.get());
+            Community community = found.get();
+            Map<String, Object> response = new HashMap<>();
+            response.put("community", community);
+            response.put("onlineCount", onlineTracker.getOnlineCount(community.getName()));
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(404).body("Community not found");
         }
@@ -77,7 +90,6 @@ public class CommunityController {
 
             String iconUrl = null;
             String bannerUrl = null;
-
             if (iconFile != null && !iconFile.isEmpty()) {
                 iconUrl = s3Service.uploadFile(iconFile);
             }
@@ -92,6 +104,14 @@ public class CommunityController {
             community.setIconUrl(iconUrl);
             community.setBannerUrl(bannerUrl);
             community.setTopicsFromJson(topicsJson);
+
+            // Add the creator as the first moderator
+            List<String> initialModerators = new ArrayList<>();
+            initialModerators.add(email);
+            community.setModerators(initialModerators);
+
+            // Set the creation date
+            community.setCreatedAt(new Date());
 
             Community saved = communityRepo.save(community);
             return ResponseEntity.ok(saved);
@@ -192,9 +212,13 @@ public class CommunityController {
         if (!community.getMembers().contains(userEmail)) {
             community.getMembers().add(userEmail);
             communityRepo.save(community);
+            onlineTracker.userJoined(name, userEmail);
         }
 
-        return ResponseEntity.ok("Joined successfully");
+        Map<String, Object> response = new HashMap<>();
+        response.put("community", community);
+        response.put("onlineCount", onlineTracker.getOnlineCount(name));
+        return ResponseEntity.ok(response);
     }
 
     // Leave a community (except if moderator)
@@ -217,9 +241,50 @@ public class CommunityController {
 
         if (community.getMembers().remove(userEmail)) {
             communityRepo.save(community);
-            return ResponseEntity.ok("Left successfully");
+            onlineTracker.userLeft(name, userEmail);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("community", community);
+            response.put("onlineCount", onlineTracker.getOnlineCount(name));
+            return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body("You are not a member of this community");
+    }
+
+    // Promote a member to moderator (Only moderators can do this)
+    @PostMapping("/promote/{name}/{memberEmail}")
+    public ResponseEntity<?> promoteMember(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String name,
+            @PathVariable String memberEmail) {
+
+        String token = authHeader.replace("Bearer ", "");
+        String requestingUserEmail = jwtUtil.extractEmail(token);
+
+        Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404).body("Community not found");
+        }
+
+        Community community = found.get();
+
+        // Only moderators can promote
+        if (!community.getModerators().contains(requestingUserEmail)) {
+            return ResponseEntity.status(403).body("Only moderators can promote members");
+        }
+
+        // Must be a member, and not already a moderator
+        if (!community.getMembers().contains(memberEmail)) {
+            return ResponseEntity.badRequest().body("User is not a member");
+        }
+        if (community.getModerators().contains(memberEmail)) {
+            return ResponseEntity.badRequest().body("User is already a moderator");
+        }
+
+        community.getModerators().add(memberEmail);
+        communityRepo.save(community);
+
+        return ResponseEntity.ok(community);
     }
 
     // Return all communities the user has joined or created
@@ -229,12 +294,78 @@ public class CommunityController {
         String email = jwtUtil.extractEmail(token);
         List<Community> all = communityRepo.findAll();
 
-        // Filter where user is either creator or member
         List<Community> joined = all.stream()
                 .filter(c -> c.getCreatedBy().equalsIgnoreCase(email)
                         || (c.getMembers() != null && c.getMembers().contains(email)))
                 .toList();
 
         return ResponseEntity.ok(joined);
+    }
+
+    // Presence endpoints (unchanged)
+    @PostMapping("/presence/{name}/join")
+    public ResponseEntity<?> trackUserJoined(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String name) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractEmail(token);
+
+        Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404).body("Community not found");
+        }
+
+        onlineTracker.userJoined(name, email);
+        return ResponseEntity.ok(onlineTracker.getOnlineCount(name));
+    }
+
+    @PostMapping("/presence/{name}/leave")
+    public ResponseEntity<?> trackUserLeft(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String name) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractEmail(token);
+
+        Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404).body("Community not found");
+        }
+
+        onlineTracker.userLeft(name, email);
+        return ResponseEntity.ok(onlineTracker.getOnlineCount(name));
+    }
+
+    @GetMapping("/presence/{name}")
+    public ResponseEntity<?> getOnlineCount(@PathVariable String name) {
+        Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404).body("Community not found");
+        }
+        return ResponseEntity.ok(onlineTracker.getOnlineCount(name));
+    }
+
+    @GetMapping("/presence/{name}/users")
+    public ResponseEntity<?> getOnlineUsers(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String name) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractEmail(token);
+
+        Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404).body("Community not found");
+        }
+
+        Community community = found.get();
+
+        if (!community.getModerators().contains(email)) {
+            return ResponseEntity.status(403).body("Only moderators can see online users");
+        }
+
+        Set<String> onlineUsers = onlineTracker.getOnlineUsers(name);
+        Map<String, Object> response = new HashMap<>();
+        response.put("onlineUsers", onlineUsers);
+        response.put("onlineCount", onlineUsers.size());
+        return ResponseEntity.ok(response);
     }
 }
