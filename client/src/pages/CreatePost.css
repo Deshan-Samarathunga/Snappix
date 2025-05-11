@@ -1,32 +1,49 @@
 /* CreatePost.css */
 .create-post-container {
-    max-width: 700px;
-    margin: auto;
-  }
-  
-  .nav-tabs .nav-link {
-    cursor: pointer;
-  }
+  max-width: 700px;
+  margin: auto;
+}
 
-  textarea,
-  input[type="text"] {
-    font-size: 15px;
-    color: white;
-  }
-  
-  ::placeholder {
-    color: #aaa;
-  }
-  
-  .create-post-container .nav-tabs .nav-link.active {
-    color: #000000 !important;
-    border-bottom: 2px solid #f0ad4e;
-  }
-  
-  .create-post-container .nav-tabs .nav-link {
-    color: #aaa !important;
-    border: none;
-    background: transparent;
-    font-weight: 500;
-  }
-  
+/* Tab styles */
+.nav-tabs .nav-link {
+  cursor: pointer;
+  color: #aaa !important;
+  border: none;
+  background: transparent;
+  font-weight: 500;
+}
+
+.create-post-container .nav-tabs .nav-link.active {
+  color: #000000 !important;
+  border-bottom: 2px solid #f0ad4e;
+}
+
+/* Form inputs */
+textarea,
+input[type="text"] {
+  font-size: 15px;
+  color: #ddd;
+  background-color: #1f1f1f;
+  border-color: #555;
+}
+
+/* Placeholders */
+::placeholder {
+  color: #aaa !important;
+}
+
+/* Form control consistency */
+.create-post-container .form-control,
+.create-post-container select {
+  color: #ddd;
+  background-color: #1f1f1f;
+  border-color: #555;
+}
+
+/* Text hints and helper messages */
+.create-post-container p,
+.create-post-container small,
+.create-post-container label,
+.create-post-container .text-muted {
+  color: #ccc !important;
+}
