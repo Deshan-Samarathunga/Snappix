@@ -35,37 +35,46 @@ export default function CreatePost() {
 
   const handleFileChange = async (e) => {
     const selected = Array.from(e.target.files);
-    const total = media.length + selected.length;
+    const selectedType = selected[0]?.type?.split('/')[0];
+    const currentType = media[0]?.type?.split('/')[0];
 
-    if (total > 3) {
-      toast.warn('🚫 Maximum of 3 files allowed.');
-      return;
-    }
-
-    const existingType = media[0]?.type?.split('/')[0];
-    const incomingType = selected[0]?.type?.split('/')[0];
-
-    if (media.length > 0 && existingType !== incomingType) {
+    // Prevent mixing images and videos
+    if (media.length > 0 && selectedType && currentType !== selectedType) {
       toast.warn('🚫 Cannot mix images and videos in one post.');
       return;
     }
 
-    const validFiles = [];
-
-    for (let file of selected) {
-      if (file.type.startsWith('video/')) {
-        const isTooLong = await checkVideoDuration(file);
-        if (isTooLong) {
-          toast.warn(`🚫 ${file.name} is longer than 30 seconds.`);
-          continue;
-        }
+    // If adding videos
+    if (selectedType === 'video') {
+      if (media.length > 0 || selected.length > 1) {
+        toast.warn('🚫 Only 1 video file allowed.');
+        return;
       }
-      validFiles.push(file);
+
+      const isTooLong = await checkVideoDuration(selected[0]);
+      if (isTooLong) {
+        toast.warn(`🚫 ${selected[0].name} is longer than 30 seconds.`);
+        return;
+      }
+
+      const preview = URL.createObjectURL(selected[0]);
+      setMedia([selected[0]]);
+      setPreviewUrls([preview]);
+      return;
     }
 
-    const previews = validFiles.map((file) => URL.createObjectURL(file));
-    setMedia((prev) => [...prev, ...validFiles]);
-    setPreviewUrls((prev) => [...prev, ...previews]);
+    // If adding images
+    if (selectedType === 'image') {
+      const total = media.length + selected.length;
+      if (total > 3) {
+        toast.warn('🚫 Maximum of 3 images allowed.');
+        return;
+      }
+
+      const previews = selected.map((file) => URL.createObjectURL(file));
+      setMedia((prev) => [...prev, ...selected]);
+      setPreviewUrls((prev) => [...prev, ...previews]);
+    }
   };
 
   const checkVideoDuration = (file) => {
