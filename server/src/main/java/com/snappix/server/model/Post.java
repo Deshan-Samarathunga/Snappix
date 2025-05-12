@@ -14,7 +14,7 @@ public class Post {
     private String id;
 
     private String userEmail;
-    private String userName; // ✅ added
+    private String userName;
     private String community;
     private String description;
     private List<String> mediaUrls;

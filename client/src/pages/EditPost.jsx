@@ -38,7 +38,7 @@ export default function EditPost() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success("✅ Post updated!");
+      toast.success("Post updated!");
       setTimeout(() => navigate("/profile"), 1000);
     } catch (err) {
       toast.error("❌ Failed to update post");

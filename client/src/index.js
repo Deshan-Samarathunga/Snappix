@@ -10,7 +10,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 import { Provider } from 'react-redux';
-import { store } from './redux/store'; // ✅ Redux store import
+import { store } from './redux/store'; //Redux store import
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

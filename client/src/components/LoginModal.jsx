@@ -21,7 +21,7 @@ export default function LoginModal({ show, onHide }) {
       localStorage.setItem("snappixUser", JSON.stringify(user));
       localStorage.setItem("snappixSession", accessToken);
 
-      toast.success("✅ Logged in successfully");
+      toast.success("Logged in successfully");
       onHide();
       setTimeout(() => navigate("/profile"), 500);
     } catch (error) {
