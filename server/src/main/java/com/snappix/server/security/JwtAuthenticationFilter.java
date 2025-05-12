@@ -45,12 +45,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
-                System.out.println("✅ JWT Valid: Authenticated user is " + email);
+                System.out.println("JWT Valid: Authenticated user is " + email);
             } catch (Exception e) {
-                System.out.println("❌ JWT Invalid: " + e.getMessage());
+                System.out.println("JWT Invalid: " + e.getMessage());
             }
         } else {
-            System.out.println("⚠️ No Authorization header or Bearer token missing");
+            System.out.println("No Authorization header or Bearer token missing");
         }
 
         filterChain.doFilter(request, response);

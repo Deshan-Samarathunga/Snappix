@@ -23,7 +23,7 @@ public class Community {
     private List<String> topics;
     private String createdBy;
 
-    // ✅ Members list
+    // Members list
     private List<String> members = new ArrayList<>();
 
     public Community() {}
@@ -34,7 +34,7 @@ public class Community {
         this.iconUrl = iconUrl;
     }
 
-    // ✅ Getters and Setters
+    // Getters and Setters
 
     public String getId() {
         return id;
@@ -89,12 +89,12 @@ public class Community {
         this.members = members;
     }
 
-    // ✅ Dynamic member count for display
+    // Dynamic member count for display
     public int getMemberCount() {
         return members == null ? 0 : members.size();
     }
 
-    // ✅ Parse JSON array string to List<String>
+    // Parse JSON array string to List<String>
     @JsonIgnore
     public void setTopicsFromJson(String json) {
         try {

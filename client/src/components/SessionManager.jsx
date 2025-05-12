@@ -16,7 +16,7 @@ export default function SessionManager() {
   const resetTimer = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(logout, TIMEOUT_MS);
-  }, [logout, TIMEOUT_MS]); // ✅ Added TIMEOUT_MS to dependencies
+  }, [logout, TIMEOUT_MS]); // Added TIMEOUT_MS to dependencies
 
   const handleActivity = useCallback(() => {
     resetTimer();

@@ -56,12 +56,12 @@ export default function CreateCommunity() {
 
 
       const newCommunity = res.data;
-      toast.success("✅ Community created!");
+      toast.success("Community created!");
       navigate(`/c/${newCommunity.name}`); // redirect to community page
     } catch (err) {
       console.error("Error details:", err.response?.data || err.message);
       console.error(err); 
-      toast.error("❌ Failed to create community.");
+      toast.error("Failed to create community.");
     }
 
   };

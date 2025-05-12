@@ -55,10 +55,10 @@ public class AuthController {
 
             Cookie cookie = new Cookie("refreshToken", refreshToken);
             cookie.setHttpOnly(true);
-            cookie.setSecure(true); // ✅ Enable for production HTTPS
+            cookie.setSecure(true); // Enable for production HTTPS
             cookie.setPath("/");
             cookie.setMaxAge(60 * 60 * 24 * 7);
-            cookie.setAttribute("SameSite", "None"); // ✅ Important for cross-origin requests
+            cookie.setAttribute("SameSite", "None"); // Important for cross-origin requests
             response.addCookie(cookie);
 
             return ResponseEntity.ok(Map.of(
@@ -90,11 +90,11 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
         if (refreshToken != null) {
-            refreshTokenRepo.deleteByToken(refreshToken); // 🔐 Revoke refresh token
+            refreshTokenRepo.deleteByToken(refreshToken); // Revoke refresh token
 
             Cookie cookie = new Cookie("refreshToken", null); // clear cookie
             cookie.setHttpOnly(true);
-            cookie.setSecure(true); // ✅ for production
+            cookie.setSecure(true);
             cookie.setPath("/");
             cookie.setMaxAge(0);
             cookie.setAttribute("SameSite", "None");

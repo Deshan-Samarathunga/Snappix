@@ -26,13 +26,13 @@ public class CommunityController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // ✅ Get all communities
+    // Get all communities
     @GetMapping
     public ResponseEntity<List<Community>> getAll() {
         return ResponseEntity.ok(communityRepo.findAll());
     }
 
-    // ✅ Get communities created by the currently authenticated user
+    // Get communities created by the currently authenticated user
     @GetMapping("/my")
     public List<Community> getMyCommunities(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
@@ -40,7 +40,7 @@ public class CommunityController {
         return communityRepo.findByCreatedBy(email);
     }
 
-    // ✅ Get a community by name
+    // Get a community by name
     @GetMapping("/name/{name}")
     public ResponseEntity<Object> getCommunityByName(@PathVariable String name) {
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
@@ -48,7 +48,7 @@ public class CommunityController {
                 .orElseGet(() -> ResponseEntity.status(404).body("Community not found"));
     }
 
-    // ✅ Create a new community with optional icon/banner and topic list
+    // Create a new community with optional icon/banner and topic list
     @PostMapping
     public ResponseEntity<?> createCommunity(
             @RequestHeader("Authorization") String authHeader,
@@ -87,7 +87,7 @@ public class CommunityController {
         }
     }
 
-    // ✅ Join an existing community (except if already the creator)
+    // Join an existing community (except if already the creator)
     @PostMapping("/join/{name}")
     public ResponseEntity<?> joinCommunity(@RequestHeader("Authorization") String authHeader,
             @PathVariable String name) {
@@ -113,7 +113,7 @@ public class CommunityController {
         return ResponseEntity.ok("Joined successfully");
     }
 
-    // ✅ Leave a community (except if moderator)
+    // Leave a community (except if moderator)
     @PostMapping("/leave/{name}")
     public ResponseEntity<?> leaveCommunity(@RequestHeader("Authorization") String authHeader,
             @PathVariable String name) {
@@ -139,7 +139,7 @@ public class CommunityController {
         return ResponseEntity.badRequest().body("You are not a member of this community");
     }
 
-    // ✅ Return all communities the user has joined or created
+    // Return all communities the user has joined or created
     @GetMapping("/joined")
     public ResponseEntity<?> getJoinedCommunities(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");

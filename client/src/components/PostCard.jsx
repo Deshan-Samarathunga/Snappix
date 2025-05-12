@@ -1,5 +1,4 @@
 // client/src/components/PostCard.jsx
-// client/src/components/PostCard.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -76,20 +75,11 @@ export default function PostCard({ post, location = 'home' }) {
     const showArrows = isOnlyImages && post.mediaUrls.length > 1;
 
     return (
-      <Carousel
-        interval={null}
-        className="mb-3 post-carousel"
-        controls={showArrows}
-        indicators={showArrows}
-      >
+      <Carousel interval={null} className="mb-3 post-carousel" controls={showArrows} indicators={showArrows}>
         {post.mediaUrls.map((url, index) =>
           url.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
             <Carousel.Item key={index}>
-              <img
-                className="d-block w-100 rounded"
-                src={url}
-                alt={`slide-${index}`}
-              />
+              <img className="d-block w-100 rounded" src={url} alt={`slide-${index}`} />
             </Carousel.Item>
           ) : (
             <Carousel.Item key={index}>
@@ -108,50 +98,23 @@ export default function PostCard({ post, location = 'home' }) {
       <div className="post-header d-flex justify-content-between align-items-start">
         <div>
           <div className="fw-bold text-info" style={{ fontSize: '14px' }}>
-            {location === 'home'
-              ? `r/${post.community}`
-              : `${post.userName || post.userEmail}`}
+            {location === 'home' ? `c/${post.community}` : `${post.userName || post.userEmail}`}
           </div>
           <div className="text-muted fw-medium" style={{ fontSize: '12px' }}>
-            {post.createdAt
-              ? formatDistanceToNow(new Date(post.createdAt), {
-                  addSuffix: true,
-                })
-              : ''}
+            {post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }) : ''}
           </div>
         </div>
 
         {isOwner && (
           <div ref={dropdownRef}>
-            <FontAwesomeIcon
-              icon={faEllipsisV}
-              className="text-white"
-              role="button"
-              onClick={() => setShowOptions((prev) => !prev)}
-            />
+            <FontAwesomeIcon icon={faEllipsisV} className="text-white" role="button" onClick={() => setShowOptions((prev) => !prev)} />
             {showOptions && (
-              <div
-                className="position-absolute bg-dark border border-secondary rounded shadow-sm mt-2 text-white z-3"
-                style={{ right: 0, minWidth: 120 }}
-              >
-                <div
-                  className="px-3 py-2 hover-bg-secondary"
-                  role="button"
-                  onClick={handleEdit}
-                >
-                  <FontAwesomeIcon icon={faPen} className="me-2 text-warning" />
-                  Edit
+              <div className="position-absolute bg-dark border border-secondary rounded shadow-sm mt-2 text-white z-3" style={{ right: 0, minWidth: 120 }}>
+                <div className="px-3 py-2 hover-bg-secondary" role="button" onClick={handleEdit}>
+                  <FontAwesomeIcon icon={faPen} className="me-2 text-warning" /> Edit
                 </div>
-                <div
-                  className="px-3 py-2 hover-bg-secondary"
-                  role="button"
-                  onClick={() => setShowDeleteModal(true)}
-                >
-                  <FontAwesomeIcon
-                    icon={faTrash}
-                    className="me-2 text-danger"
-                  />
-                  Delete
+                <div className="px-3 py-2 hover-bg-secondary" role="button" onClick={() => setShowDeleteModal(true)}>
+                  <FontAwesomeIcon icon={faTrash} className="me-2 text-danger" /> Delete
                 </div>
               </div>
             )}
@@ -160,12 +123,9 @@ export default function PostCard({ post, location = 'home' }) {
       </div>
 
       <div className="mb-2">
-        <h5 className="fw-semibold">
-          {(post.description || '').split('\n')[0]}
-        </h5>
+        <h5 className="fw-semibold">{(post.description || '').split('\n')[0]}</h5>
         <p className="text-muted mb-2">
-          {(post.description || '').split('\n').slice(1).join('\n') ||
-            'No description.'}
+          {(post.description || '').split('\n').slice(1).join('\n') || 'No description.'}
         </p>
       </div>
 
@@ -174,22 +134,12 @@ export default function PostCard({ post, location = 'home' }) {
       {post.mediaUrls?.length > 1 && renderCarousel()}
 
       <div className="d-flex gap-3 align-items-center">
-        <span>
-          <FontAwesomeIcon icon={faThumbsUp} className="me-1" /> 0
-        </span>
-        <span>
-          <FontAwesomeIcon icon={faCommentDots} className="me-1" /> 0
-        </span>
-        <span>
-          <FontAwesomeIcon icon={faShare} className="me-1" /> Share
-        </span>
+        <span><FontAwesomeIcon icon={faThumbsUp} className="me-1" /> 0</span>
+        <span><FontAwesomeIcon icon={faCommentDots} className="me-1" /> 0</span>
+        <span><FontAwesomeIcon icon={faShare} className="me-1" /> Share</span>
       </div>
 
-      <DeleteModal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        onConfirm={confirmDelete}
-      />
+      <DeleteModal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} onConfirm={confirmDelete} />
     </div>
   );
 }

@@ -8,6 +8,8 @@ import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
 import { useDispatch } from 'react-redux';
 import { addPost, setStatus, setError } from '../redux/postSlice';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBan, faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
 export default function CreatePost() {
   const [activeTab, setActiveTab] = useState('text');
@@ -25,11 +27,9 @@ export default function CreatePost() {
     const token = localStorage.getItem('snappixSession');
     if (!token) return;
 
-    axios
-      .get('http://localhost:8080/api/communities/joined', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setUserCommunities(res.data))
+    axios.get('http://localhost:8080/api/communities/joined', {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => setUserCommunities(res.data))
       .catch((err) => console.error('Failed to fetch communities', err));
   }, []);
 
@@ -38,22 +38,20 @@ export default function CreatePost() {
     const selectedType = selected[0]?.type?.split('/')[0];
     const currentType = media[0]?.type?.split('/')[0];
 
-    // Prevent mixing images and videos
     if (media.length > 0 && selectedType && currentType !== selectedType) {
-      toast.warn('🚫 Cannot mix images and videos in one post.');
+      toast.warn(<><FontAwesomeIcon icon={faBan} className="me-2 text-warning" />Cannot mix images and videos in one post.</>);
       return;
     }
 
-    // If adding videos
     if (selectedType === 'video') {
       if (media.length > 0 || selected.length > 1) {
-        toast.warn('🚫 Only 1 video file allowed.');
+        toast.warn(<><FontAwesomeIcon icon={faBan} className="me-2 text-warning" />Only 1 video file allowed.</>);
         return;
       }
 
       const isTooLong = await checkVideoDuration(selected[0]);
       if (isTooLong) {
-        toast.warn(`🚫 ${selected[0].name} is longer than 30 seconds.`);
+        toast.warn(<><FontAwesomeIcon icon={faBan} className="me-2 text-warning" />{selected[0].name} is longer than 30 seconds.</>);
         return;
       }
 
@@ -63,11 +61,10 @@ export default function CreatePost() {
       return;
     }
 
-    // If adding images
     if (selectedType === 'image') {
       const total = media.length + selected.length;
       if (total > 3) {
-        toast.warn('🚫 Maximum of 3 images allowed.');
+        toast.warn(<><FontAwesomeIcon icon={faBan} className="me-2 text-warning" />Maximum of 3 images allowed.</>);
         return;
       }
 
@@ -82,12 +79,10 @@ export default function CreatePost() {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
       video.preload = 'metadata';
-
       video.onloadedmetadata = () => {
         URL.revokeObjectURL(url);
         resolve(video.duration > 31);
       };
-
       video.src = url;
     });
   };
@@ -105,7 +100,7 @@ export default function CreatePost() {
     e.preventDefault();
     if (isSubmitting) return;
     if (!community) {
-      toast.warn('Please select a community before posting.');
+      toast.warn(<><FontAwesomeIcon icon={faBan} className="me-2 text-warning" />Please select a community before posting.</>);
       return;
     }
 
@@ -121,26 +116,20 @@ export default function CreatePost() {
       dispatch(setStatus('loading'));
       setIsSubmitting(true);
 
-      const res = await axios.post(
-        'http://localhost:8080/api/posts/create',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const res = await axios.post('http://localhost:8080/api/posts/create', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       dispatch(addPost(res.data));
       dispatch(setStatus('success'));
-      toast.success('✅ Post uploaded!');
+      toast.success(<><FontAwesomeIcon icon={faCheckCircle} className="me-2 text-success" />Post uploaded!</>);
       navigate(`/c/${community.trim()}`);
     } catch (err) {
       dispatch(setError(err.response?.data || 'Unknown error'));
-      toast.error(
-        '❌ Upload failed: ' + (err.response?.data || 'Unknown error')
-      );
+      toast.error(<><FontAwesomeIcon icon={faTimesCircle} className="me-2 text-danger" />Upload failed: {err.response?.data || 'Unknown error'}</>);
     } finally {
       setIsSubmitting(false);
     }
@@ -151,33 +140,15 @@ export default function CreatePost() {
       <Topbar />
       <div className="d-flex">
         <Sidebar />
-        <main
-          className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center"
-          style={{
-            marginLeft: '280px',
-            marginTop: '60px',
-            height: 'calc(100vh - 60px)',
-            overflowY: 'auto',
-            backgroundColor: '#1a1a1b',
-          }}
-        >
-          <div
-            className="create-post-container bg-dark text-light p-4 rounded shadow w-100"
-            style={{ maxWidth: '640px' }}
-          >
+        <main className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center" style={{ marginLeft: '280px', marginTop: '60px', height: 'calc(100vh - 60px)', overflowY: 'auto', backgroundColor: '#1a1a1b' }}>
+          <div className="create-post-container bg-dark text-light p-4 rounded shadow w-100" style={{ maxWidth: '640px' }}>
             <h5 className="fw-bold mb-3">Create post</h5>
 
             <div className="mb-4">
-              <select
-                className="form-select bg-dark text-light border-secondary"
-                value={community}
-                onChange={(e) => setCommunity(e.target.value)}
-              >
+              <select className="form-select bg-dark text-light border-secondary" value={community} onChange={(e) => setCommunity(e.target.value)}>
                 <option value="">Select a community</option>
                 {userCommunities.map((c) => (
-                  <option key={c.id} value={c.name}>
-                    {c.name}
-                  </option>
+                  <option key={c.id} value={c.name}>{c.name}</option>
                 ))}
               </select>
             </div>
@@ -185,15 +156,8 @@ export default function CreatePost() {
             <ul className="nav nav-tabs mb-3 border-secondary">
               {['text', 'media', 'video'].map((tab) => (
                 <li className="nav-item" key={tab}>
-                  <button
-                    className={`nav-link ${activeTab === tab ? 'active' : ''} text-white`}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {tab === 'text'
-                      ? 'Text'
-                      : tab === 'media'
-                        ? 'Images'
-                        : 'Video'}
+                  <button className={`nav-link ${activeTab === tab ? 'active' : ''} text-white`} onClick={() => setActiveTab(tab)}>
+                    {tab === 'text' ? 'Text' : tab === 'media' ? 'Images' : 'Video'}
                   </button>
                 </li>
               ))}
@@ -201,37 +165,16 @@ export default function CreatePost() {
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <input
-                  type="text"
-                  className="form-control bg-dark text-light border-secondary"
-                  placeholder="Title"
-                  maxLength={300}
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
+                <input type="text" className="form-control bg-dark text-light border-secondary" placeholder="Title" maxLength={300} required value={title} onChange={(e) => setTitle(e.target.value)} />
                 <small className="text-muted">{title.length}/300</small>
               </div>
 
               {(activeTab === 'media' || activeTab === 'video') && (
                 <>
-                  <div
-                    className="mb-3 border border-secondary rounded p-5 text-center text-muted"
-                    style={{ borderStyle: 'dashed' }}
-                  >
+                  <div className="mb-3 border border-secondary rounded p-5 text-center text-muted" style={{ borderStyle: 'dashed' }}>
                     <p className="mb-0">Drag and Drop media or</p>
-                    <input
-                      type="file"
-                      className="form-control mt-2"
-                      accept={activeTab === 'media' ? 'image/*' : 'video/*'}
-                      multiple
-                      onChange={handleFileChange}
-                    />
-                    <small className="text-muted mt-2">
-                      Max 3 files. Videos must be under 30 seconds.
-                      <br />
-                      Cannot mix image and video types in a single post.
-                    </small>
+                    <input type="file" className="form-control mt-2" accept={activeTab === 'media' ? 'image/*' : 'video/*'} multiple onChange={handleFileChange} />
+                    <small className="text-muted mt-2">Max 3 files. Videos must be under 30 seconds.<br />Cannot mix image and video types in a single post.</small>
                   </div>
 
                   {previewUrls.length > 0 && (
@@ -239,25 +182,11 @@ export default function CreatePost() {
                       {previewUrls.map((url, index) => (
                         <div key={index} className="position-relative">
                           {media[index].type.startsWith('video/') ? (
-                            <video
-                              src={url}
-                              className="border border-secondary rounded"
-                              style={{ maxWidth: 130 }}
-                              muted
-                            />
+                            <video src={url} className="border border-secondary rounded" style={{ maxWidth: 130 }} muted />
                           ) : (
-                            <img
-                              src={url}
-                              className="border border-secondary rounded"
-                              style={{ maxWidth: 130 }}
-                              alt={`preview-${index}`}
-                            />
+                            <img src={url} className="border border-secondary rounded" style={{ maxWidth: 130 }} alt={`preview-${index}`} />
                           )}
-                          <button
-                            type="button"
-                            className="btn-close btn-close-white position-absolute top-0 end-0 m-1"
-                            onClick={() => removeMedia(index)}
-                          />
+                          <button type="button" className="btn-close btn-close-white position-absolute top-0 end-0 m-1" onClick={() => removeMedia(index)} />
                         </div>
                       ))}
                     </div>
@@ -266,23 +195,11 @@ export default function CreatePost() {
               )}
 
               <div className="mb-3">
-                <textarea
-                  className="form-control bg-dark text-light border-secondary"
-                  rows="5"
-                  placeholder="Body"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                />
+                <textarea className="form-control bg-dark text-light border-secondary" rows="5" placeholder="Body" value={body} onChange={(e) => setBody(e.target.value)} />
               </div>
 
               <div className="d-flex justify-content-end">
-                <button
-                  type="submit"
-                  className="btn btn-warning"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Posting...' : 'Post'}
-                </button>
+                <button type="submit" className="btn btn-warning" disabled={isSubmitting}>{isSubmitting ? 'Posting...' : 'Post'}</button>
               </div>
             </form>
           </div>

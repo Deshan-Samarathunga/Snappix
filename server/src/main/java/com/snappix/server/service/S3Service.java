@@ -54,7 +54,7 @@ public class S3Service {
 
             getS3Client().putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
         } catch (Exception e) {
-            System.err.println("❌ Failed to upload to S3: " + e.getMessage());
+            System.err.println("Failed to upload to S3: " + e.getMessage());
             throw new IOException("S3 upload failed", e);
         }
 
@@ -79,10 +79,10 @@ public class S3Service {
                     .build();
 
             getS3Client().deleteObject(deleteRequest);
-            System.out.println("✅ Deleted from S3: " + key);
+            System.out.println("Deleted from S3: " + key);
 
         } catch (Exception e) {
-            System.err.println("❌ Failed to delete from S3: " + e.getMessage());
+            System.err.println("Failed to delete from S3: " + e.getMessage());
             e.printStackTrace();
         }
     }
