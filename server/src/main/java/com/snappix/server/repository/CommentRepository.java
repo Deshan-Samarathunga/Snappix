@@ -1,3 +1,4 @@
+
 package com.snappix.server.repository;
 
 import com.snappix.server.model.Comment;
@@ -13,3 +14,5 @@ public interface CommentRepository extends MongoRepository<Comment, String> {
     // Optional: Get comments by user email (if needed)
     List<Comment> findByUserEmail(String userEmail);
 }
+
+

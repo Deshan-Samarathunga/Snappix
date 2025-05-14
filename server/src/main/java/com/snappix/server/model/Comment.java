@@ -1,3 +1,4 @@
+
 package com.snappix.server.model;
 
 import org.springframework.data.annotation.Id;
@@ -39,3 +40,4 @@ public class Comment {
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 }
+
