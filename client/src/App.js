@@ -12,6 +12,8 @@ import ExploreCommunities from './pages/ExploreCommunities';
 import EditPost from './pages/EditPost';
 import PrivateRoute from './components/PrivateRoute';
 import SessionManager from './components/SessionManager';
+import SinglePostPage from './pages/SinglePostPage';
+
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -30,6 +32,7 @@ function App() {
           <Route path="/create-community" element={<PrivateRoute><CreateCommunity /></PrivateRoute>} />
           <Route path="/c/:name" element={<CommunityPage />} />
           <Route path="/explore" element={<PrivateRoute><ExploreCommunities /></PrivateRoute>} />
+          <Route path="/post/:id" element={<SinglePostPage />} />
           <Route path="/edit-post/:id" element={<EditPost />} />
         </Routes>
       </Router>

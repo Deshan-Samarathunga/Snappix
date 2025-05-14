@@ -53,6 +53,10 @@ export default function PostCard({ post, location = 'home' }) {
       .catch(() => alert('❌ Delete failed'));
   };
 
+  const goToSinglePost = () => {
+    navigate(`/post/${post.id}`);
+  };
+
   const renderSingleMedia = (url) => {
     return url.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
       <div className="media-single mb-3">
@@ -122,20 +126,27 @@ export default function PostCard({ post, location = 'home' }) {
         )}
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2" role="button" onClick={goToSinglePost}>
         <h5 className="fw-semibold">{(post.description || '').split('\n')[0]}</h5>
         <p className="text-muted mb-2">
           {(post.description || '').split('\n').slice(1).join('\n') || 'No description.'}
         </p>
       </div>
 
-      {/* Media rendering */}
       {post.mediaUrls?.length === 1 && renderSingleMedia(post.mediaUrls[0])}
       {post.mediaUrls?.length > 1 && renderCarousel()}
 
       <div className="d-flex gap-3 align-items-center">
         <span><FontAwesomeIcon icon={faThumbsUp} className="me-1" /> 0</span>
-        <span><FontAwesomeIcon icon={faCommentDots} className="me-1" /> 0</span>
+        <span
+          role="button"
+          onClick={() => {
+            if (location !== "single") navigate(`/post/${post.id}`);
+          }}
+        >
+          <FontAwesomeIcon icon={faCommentDots} className="me-1" /> 0
+        </span>
+
         <span><FontAwesomeIcon icon={faShare} className="me-1" /> Share</span>
       </div>
 
