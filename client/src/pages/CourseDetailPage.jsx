@@ -128,24 +128,48 @@ export default function CourseDetailPage() {
             <div className="card-body">
               {isEditing ? (
                 <form onSubmit={handleEditSubmit}>
-                  <h3 className="card-title text-primary fw-bold">Edit Course</h3>
-                  <div className="mb-3">
-                    <label className="form-label">Course Title</label>
-                    <input type="text" className="form-control" name="title" value={formData.title} onChange={handleEditChange} required />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Description</label>
-                    <textarea className="form-control" name="description" rows="3" value={formData.description} onChange={handleEditChange} required />
-                  </div>
-                  <button type="submit" className="btn btn-success me-2">💾 Save</button>
-                  <button type="button" className="btn btn-secondary" onClick={() => setIsEditing(false)}>❌ Cancel</button>
-                </form>
+          <h3 className="card-title text-primary fw-bold mb-4">Edit Course</h3>
+          <div className="mb-3">
+            <label className="form-label">Course Title</label>
+            <input type="text" className="form-control" name="title" value={formData.title} onChange={handleEditChange} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Description</label>
+            <textarea className="form-control" name="description" rows="3" value={formData.description} onChange={handleEditChange} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Instructor Name</label>
+            <input type="text" className="form-control" name="instructorName" value={formData.instructorName} onChange={handleEditChange} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Instructor Email</label>
+            <input type="email" className="form-control" name="instructorEmail" value={formData.instructorEmail} onChange={handleEditChange} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Media URLs (comma separated)</label>
+            <input
+              type="text"
+              className="form-control"
+              value={formData.mediaUrls.join(', ')}
+              onChange={(e) =>
+                setFormData(prev => ({
+                  ...prev,
+                  mediaUrls: e.target.value.split(',').map(url => url.trim())
+                }))
+              }
+            />
+          </div>
+          <div className="mt-4">
+            <button type="submit" className="btn btn-success me-2">💾 Save</button>
+            <button type="button" className="btn btn-secondary" onClick={() => setIsEditing(false)}>❌ Cancel</button>
+          </div>
+        </form>
               ) : (
                 <>
                   <h2 className="card-title mb-3 text-info fw-bold">{course.title}</h2>
                   <p className="card-text"><strong>Description:</strong> {course.description}</p>
-                  <p className="card-text"><strong>Instructor:</strong> {course.instructorName}</p>
-                  <p className="card-text"><strong>Email:</strong> {course.instructorEmail}</p>
+                  <p className="card-text"><strong>Instructor's Name:</strong> {course.instructorName}</p>
+                  <p className="card-text"><strong>Instructor's Email:</strong> {course.instructorEmail}</p>
 
                   <div className="mt-4">
                     {isCommunityMember && (
