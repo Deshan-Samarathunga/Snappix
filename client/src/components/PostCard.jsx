@@ -19,13 +19,27 @@ export default function PostCard({ post, location = "home" }) {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]); // Store comments state
 
-  useEffect(() => {
-    const savedComments = JSON.parse(localStorage.getItem(`comments_${post.id}`)) || [];
-    const savedLiked = JSON.parse(localStorage.getItem(`liked_${post.id}`)) || false;
+ useEffect(() => {
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/comments/post/${post.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setComments(data);
+      } else {
+        console.error('Failed to fetch comments');
+      }
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
 
-    setComments(savedComments);
-    setLiked(savedLiked);
-  }, [post.id]);
+  fetchComments();
+
+  const savedLiked = JSON.parse(localStorage.getItem(`liked_${post.id}`)) || false;
+  setLiked(savedLiked);
+}, [post.id]);
+
 
   const handleLike = () => {
     const newLikedStatus = !liked;
@@ -37,25 +51,51 @@ export default function PostCard({ post, location = "home" }) {
     setShowCommentBox(prev => !prev);
   };
 
-  const handleCommentSubmit = () => {
-    if (commentText.trim()) {
-      const newComment = {
-        id: Date.now(),
-        text: commentText,
-        createdAt: new Date().toISOString(),
-      };
-      const updatedComments = [...comments, newComment];
-      setComments(updatedComments);
-      setCommentText("");
-      localStorage.setItem(`comments_${post.id}`, JSON.stringify(updatedComments));
-    }
-  };
+ const handleCommentSubmit = async () => {
+  if (commentText.trim()) {
+    const newComment = {
+      postId: post.id,
+      text: commentText,
+      createdAt: new Date().toISOString(),
+    };
 
-  const handleDeleteComment = (id) => {
-    const updatedComments = comments.filter(comment => comment.id !== id);
-    setComments(updatedComments);
-    localStorage.setItem(`comments_${post.id}`, JSON.stringify(updatedComments));
-  };
+    try {
+      const response = await fetch('http://localhost:8080/api/comments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newComment),
+      });
+
+      if (response.ok) {
+        const savedComment = await response.json();
+        setComments([...comments, savedComment]);
+        setCommentText('');
+      } else {
+        console.error('Failed to create comment');
+      }
+    } catch (error) {
+      console.error('Error creating comment:', error);
+    }
+  }
+};
+
+
+  const handleDeleteComment = async (id) => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/comments/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      setComments(comments.filter(comment => comment.id !== id));
+    } else {
+      console.error('Failed to delete comment');
+    }
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+  }
+};
+
 
   const handleEditComment = (id) => {
     const updatedComments = comments.map(comment =>
@@ -93,10 +133,9 @@ export default function PostCard({ post, location = "home" }) {
   };
 
   const confirmDelete = () => {
-    localStorage.removeItem(`comments_${post.id}`);
-    localStorage.removeItem(`liked_${post.id}`);
-    window.location.reload();
-  };
+  window.location.reload();
+};
+
 
   return (
     <div className="post-card position-relative">

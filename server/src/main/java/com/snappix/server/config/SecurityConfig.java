@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/google").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
-
+                .requestMatchers("/api/comments/**").permitAll()
                 // 🔐 Protected endpoints
                 .requestMatchers(HttpMethod.POST, "/api/posts/create").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()

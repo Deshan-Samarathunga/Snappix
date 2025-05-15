@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-@Document(collection = "comments")
+@Document(collection = "comment")
 public class Comment {
 
     @Id
