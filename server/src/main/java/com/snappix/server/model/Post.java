@@ -20,6 +20,10 @@ public class Post {
     private List<String> mediaUrls;
     private Date createdAt = new Date();
 
+    // Crosspost fields
+    private String originalPostId;
+    private String originalCommunity;
+
     public Post() {}
 
     public Post(String userEmail, String userName, String community, String description, List<String> mediaUrls) {
@@ -28,25 +32,75 @@ public class Post {
         this.community = community;
         this.description = description;
         this.mediaUrls = mediaUrls;
+        this.createdAt = new Date();
     }
 
-    public String getId() { return id; }
+    // Getters & Setters
+    public String getId() {
+        return id;
+    }
 
-    public String getUserEmail() { return userEmail; }
-    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+    public String getUserEmail() {
+        return userEmail;
+    }
 
-    public String getUserName() { return userName; }
-    public void setUserName(String userName) { this.userName = userName; }
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
 
-    public String getCommunity() { return community; }
-    public void setCommunity(String community) { this.community = community; }
+    public String getUserName() {
+        return userName;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-    public List<String> getMediaUrls() { return mediaUrls; }
-    public void setMediaUrls(List<String> mediaUrls) { this.mediaUrls = mediaUrls; }
+    public String getCommunity() {
+        return community;
+    }
 
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public void setCommunity(String community) {
+        this.community = community;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getMediaUrls() {
+        return mediaUrls;
+    }
+
+    public void setMediaUrls(List<String> mediaUrls) {
+        this.mediaUrls = mediaUrls;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getOriginalPostId() {
+        return originalPostId;
+    }
+
+    public void setOriginalPostId(String originalPostId) {
+        this.originalPostId = originalPostId;
+    }
+
+    public String getOriginalCommunity() {
+        return originalCommunity;
+    }
+
+    public void setOriginalCommunity(String originalCommunity) {
+        this.originalCommunity = originalCommunity;
+    }
 }
