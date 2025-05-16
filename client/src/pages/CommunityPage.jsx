@@ -240,6 +240,16 @@ export default function CommunityPage() {
           <div className="community-page-content">
             {/* Posts Feed */}
             <div className="community-posts-list">
+              {posts.map(post => (
+  <PostCard
+    key={post.id}
+    post={post}
+    moderators={community.moderators || []}
+    currentUserEmail={user?.email}
+    communityName={community.name}
+  />
+))}
+
               {posts.length === 0 ? (
                 <div className="no-posts-message">
                   No posts in this community yet. Be the first to post!

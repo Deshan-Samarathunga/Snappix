@@ -1,7 +1,9 @@
 package com.snappix.server.controller;
 
 import com.snappix.server.model.Community;
+import com.snappix.server.model.Post;
 import com.snappix.server.repository.CommunityRepository;
+import com.snappix.server.repository.PostRepository;
 import com.snappix.server.service.OnlineUserTracker;
 import com.snappix.server.service.S3Service;
 import com.snappix.server.util.JwtUtil;
@@ -18,6 +20,9 @@ public class CommunityController {
 
     @Autowired
     private CommunityRepository communityRepo;
+
+    @Autowired
+    private PostRepository postRepo;
 
     @Autowired
     private S3Service s3Service;
@@ -83,11 +88,9 @@ public class CommunityController {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtUtil.extractEmail(token);
-
             if (communityRepo.findByNameIgnoreCase(name.trim()).isPresent()) {
                 return ResponseEntity.badRequest().body("Community name already exists");
             }
-
             String iconUrl = null;
             String bannerUrl = null;
             if (iconFile != null && !iconFile.isEmpty()) {
@@ -96,7 +99,6 @@ public class CommunityController {
             if (bannerFile != null && !bannerFile.isEmpty()) {
                 bannerUrl = s3Service.uploadFile(bannerFile);
             }
-
             Community community = new Community();
             community.setName(name.trim());
             community.setDescription(description);
@@ -104,15 +106,10 @@ public class CommunityController {
             community.setIconUrl(iconUrl);
             community.setBannerUrl(bannerUrl);
             community.setTopicsFromJson(topicsJson);
-
-            // Add the creator as the first moderator
             List<String> initialModerators = new ArrayList<>();
             initialModerators.add(email);
             community.setModerators(initialModerators);
-
-            // Set the creation date
             community.setCreatedAt(new Date());
-
             Community saved = communityRepo.save(community);
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
@@ -134,23 +131,17 @@ public class CommunityController {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtUtil.extractEmail(token);
-
             Optional<Community> found = communityRepo.findById(id);
             if (found.isEmpty()) {
                 return ResponseEntity.status(404).body("Community not found");
             }
             Community community = found.get();
-
-            // Only the creator can edit
             if (!community.getCreatedBy().equalsIgnoreCase(email)) {
                 return ResponseEntity.status(403).body("Only the creator can edit this community");
             }
-
             community.setName(name.trim());
             community.setDescription(description);
             community.setTopicsFromJson(topicsJson);
-
-            // Handle icon/banner update (optional)
             if (iconFile != null && !iconFile.isEmpty()) {
                 String iconUrl = s3Service.uploadFile(iconFile);
                 community.setIconUrl(iconUrl);
@@ -159,7 +150,6 @@ public class CommunityController {
                 String bannerUrl = s3Service.uploadFile(bannerFile);
                 community.setBannerUrl(bannerUrl);
             }
-
             Community updated = communityRepo.save(community);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
@@ -175,18 +165,14 @@ public class CommunityController {
             @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtUtil.extractEmail(token);
-
         Optional<Community> found = communityRepo.findById(id);
         if (found.isEmpty()) {
             return ResponseEntity.status(404).body("Community not found");
         }
         Community community = found.get();
-
-        // Only the creator can delete
         if (!community.getCreatedBy().equalsIgnoreCase(email)) {
             return ResponseEntity.status(403).body("Only the creator can delete this community");
         }
-
         communityRepo.deleteById(id);
         return ResponseEntity.ok("Community deleted successfully");
     }
@@ -197,24 +183,19 @@ public class CommunityController {
                                            @PathVariable String name) {
         String token = authHeader.replace("Bearer ", "");
         String userEmail = jwtUtil.extractEmail(token);
-
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
         if (found.isEmpty()) {
             return ResponseEntity.status(404).body("Community not found");
         }
-
         Community community = found.get();
-
         if (community.getCreatedBy().equalsIgnoreCase(userEmail)) {
             return ResponseEntity.badRequest().body("You are the moderator of this community");
         }
-
         if (!community.getMembers().contains(userEmail)) {
             community.getMembers().add(userEmail);
             communityRepo.save(community);
             onlineTracker.userJoined(name, userEmail);
         }
-
         Map<String, Object> response = new HashMap<>();
         response.put("community", community);
         response.put("onlineCount", onlineTracker.getOnlineCount(name));
@@ -227,22 +208,17 @@ public class CommunityController {
                                             @PathVariable String name) {
         String token = authHeader.replace("Bearer ", "");
         String userEmail = jwtUtil.extractEmail(token);
-
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
         if (found.isEmpty()) {
             return ResponseEntity.status(404).body("Community not found");
         }
-
         Community community = found.get();
-
         if (community.getCreatedBy().equalsIgnoreCase(userEmail)) {
             return ResponseEntity.badRequest().body("Moderators cannot leave their own community");
         }
-
         if (community.getMembers().remove(userEmail)) {
             communityRepo.save(community);
             onlineTracker.userLeft(name, userEmail);
-
             Map<String, Object> response = new HashMap<>();
             response.put("community", community);
             response.put("onlineCount", onlineTracker.getOnlineCount(name));
@@ -257,7 +233,33 @@ public class CommunityController {
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String name,
             @PathVariable String memberEmail) {
+        String token = authHeader.replace("Bearer ", "");
+        String requestingUserEmail = jwtUtil.extractEmail(token);
+        Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404).body("Community not found");
+        }
+        Community community = found.get();
+        if (!community.getModerators().contains(requestingUserEmail)) {
+            return ResponseEntity.status(403).body("Only moderators can promote members");
+        }
+        if (!community.getMembers().contains(memberEmail)) {
+            return ResponseEntity.badRequest().body("User is not a member");
+        }
+        if (community.getModerators().contains(memberEmail)) {
+            return ResponseEntity.badRequest().body("User is already a moderator");
+        }
+        community.getModerators().add(memberEmail);
+        communityRepo.save(community);
+        return ResponseEntity.ok(community);
+    }
 
+    // Remove a member from a community (Only moderators can do this)
+    @PostMapping("/remove-member/{name}/{memberEmail}")
+    public ResponseEntity<?> removeMember(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String name,
+            @PathVariable String memberEmail) {
         String token = authHeader.replace("Bearer ", "");
         String requestingUserEmail = jwtUtil.extractEmail(token);
 
@@ -268,37 +270,68 @@ public class CommunityController {
 
         Community community = found.get();
 
-        // Only moderators can promote
         if (!community.getModerators().contains(requestingUserEmail)) {
-            return ResponseEntity.status(403).body("Only moderators can promote members");
+            return ResponseEntity.status(403).body("Only moderators can remove members");
         }
 
-        // Must be a member, and not already a moderator
-        if (!community.getMembers().contains(memberEmail)) {
-            return ResponseEntity.badRequest().body("User is not a member");
-        }
-        if (community.getModerators().contains(memberEmail)) {
-            return ResponseEntity.badRequest().body("User is already a moderator");
+        if (community.getCreatedBy().equalsIgnoreCase(memberEmail)) {
+            return ResponseEntity.badRequest().body("Cannot remove the community creator");
         }
 
-        community.getModerators().add(memberEmail);
-        communityRepo.save(community);
+        boolean removed = community.getMembers().remove(memberEmail);
+        community.getModerators().remove(memberEmail);
 
-        return ResponseEntity.ok(community);
+        if (removed) {
+            communityRepo.save(community);
+            Map<String, Object> response = new HashMap<>();
+            response.put("community", community);
+            response.put("onlineCount", onlineTracker.getOnlineCount(name));
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body("User is not a member of this community");
+        }
+    }
+
+    // Moderators can delete any post in their community
+    @DeleteMapping("/{communityName}/delete-post/{postId}")
+    public ResponseEntity<?> deletePostByModerator(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String communityName,
+            @PathVariable String postId) {
+
+        String token = authHeader.replace("Bearer ", "");
+        String requestingUserEmail = jwtUtil.extractEmail(token);
+
+        Optional<Community> found = communityRepo.findByNameIgnoreCase(communityName);
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404).body("Community not found");
+        }
+        Community community = found.get();
+
+        // Only moderators can delete posts
+        if (!community.getModerators().contains(requestingUserEmail)) {
+            return ResponseEntity.status(403).body("Only moderators can delete posts in this community");
+        }
+
+        Optional<Post> postOpt = postRepo.findById(postId);
+        if (postOpt.isEmpty() || !postOpt.get().getCommunity().equalsIgnoreCase(communityName)) {
+            return ResponseEntity.status(404).body("Post not found in this community");
+        }
+        postRepo.deleteById(postId);
+
+        return ResponseEntity.ok("Post deleted by moderator");
     }
 
     // Return all communities the user has joined or created
     @GetMapping("/joined")
-    public ResponseEntity<?> getJoinedCommunities(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<Community>> getJoinedCommunities(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtUtil.extractEmail(token);
         List<Community> all = communityRepo.findAll();
-
         List<Community> joined = all.stream()
                 .filter(c -> c.getCreatedBy().equalsIgnoreCase(email)
                         || (c.getMembers() != null && c.getMembers().contains(email)))
                 .toList();
-
         return ResponseEntity.ok(joined);
     }
 
@@ -309,12 +342,10 @@ public class CommunityController {
             @PathVariable String name) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtUtil.extractEmail(token);
-
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
         if (found.isEmpty()) {
             return ResponseEntity.status(404).body("Community not found");
         }
-
         onlineTracker.userJoined(name, email);
         return ResponseEntity.ok(onlineTracker.getOnlineCount(name));
     }
@@ -325,12 +356,10 @@ public class CommunityController {
             @PathVariable String name) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtUtil.extractEmail(token);
-
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
         if (found.isEmpty()) {
             return ResponseEntity.status(404).body("Community not found");
         }
-
         onlineTracker.userLeft(name, email);
         return ResponseEntity.ok(onlineTracker.getOnlineCount(name));
     }
@@ -350,18 +379,14 @@ public class CommunityController {
             @PathVariable String name) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtUtil.extractEmail(token);
-
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
         if (found.isEmpty()) {
             return ResponseEntity.status(404).body("Community not found");
         }
-
         Community community = found.get();
-
         if (!community.getModerators().contains(email)) {
             return ResponseEntity.status(403).body("Only moderators can see online users");
         }
-
         Set<String> onlineUsers = onlineTracker.getOnlineUsers(name);
         Map<String, Object> response = new HashMap<>();
         response.put("onlineUsers", onlineUsers);

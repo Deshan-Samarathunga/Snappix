@@ -1,8 +1,7 @@
-// client/src/components/CreatePost.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './CreatePost.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
@@ -15,6 +14,7 @@ export default function CreatePost() {
   const [community, setCommunity] = useState('');
   const [userCommunities, setUserCommunities] = useState([]);
   const navigate = useNavigate();
+  const { communityName } = useParams();
 
   useEffect(() => {
     const token = localStorage.getItem("snappixSession");
@@ -23,9 +23,18 @@ export default function CreatePost() {
     axios.get("http://localhost:8080/api/communities/joined", {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => setUserCommunities(res.data))
+      .then(res => {
+        setUserCommunities(res.data);
+        // Pre-select community from URL if present
+        if (communityName) {
+          const found = res.data.find(
+            c => c.name.toLowerCase() === decodeURIComponent(communityName).toLowerCase()
+          );
+          if (found) setCommunity(found.name);
+        }
+      })
       .catch(err => console.error("Failed to fetch communities", err));
-  }, []);
+  }, [communityName]);
 
   const handleFileChange = (e) => setMedia([...e.target.files]);
 
@@ -57,11 +66,10 @@ export default function CreatePost() {
       console.error("Upload error:", err.response?.data || err.message);
       toast.error("❌ Upload failed: " + (err.response?.data || "Unknown error"));
     }
-
   };
 
   return (
-    <div className="bg-black text-white min-vh-100 overflow-hidden">
+    <div className="bg-white text-dark min-vh-100 overflow-hidden">
       <Topbar />
       <div className="d-flex">
         <Sidebar />
@@ -72,16 +80,16 @@ export default function CreatePost() {
             marginTop: '60px',
             height: 'calc(100vh - 60px)',
             overflowY: 'auto',
-            backgroundColor: '#1a1a1b',
+            backgroundColor: '#f6f8fa',
           }}
         >
-          <div className="create-post-container bg-dark text-light p-4 rounded shadow w-100" style={{ maxWidth: '640px' }}>
+          <div className="create-post-container bg-white text-dark p-4 rounded shadow w-100" style={{ maxWidth: '640px' }}>
             <h5 className="fw-bold mb-3">Create post</h5>
 
             {/* Community Dropdown */}
             <div className="mb-4">
               <select
-                className="form-select bg-dark text-light border-secondary"
+                className="form-select bg-white text-dark border-secondary"
                 value={community}
                 onChange={(e) => setCommunity(e.target.value)}
               >
@@ -97,7 +105,7 @@ export default function CreatePost() {
               {['text', 'media', 'video'].map((tab) => (
                 <li className="nav-item" key={tab}>
                   <button
-                    className={`nav-link ${activeTab === tab ? 'active' : ''} text-white`}
+                    className={`nav-link ${activeTab === tab ? 'active' : ''} text-dark`}
                     onClick={() => setActiveTab(tab)}
                   >
                     {tab === 'text' ? 'Text' : tab === 'media' ? 'Images' : 'Videos'}
@@ -111,7 +119,7 @@ export default function CreatePost() {
               <div className="mb-3">
                 <input
                   type="text"
-                  className="form-control bg-dark text-light border-secondary"
+                  className="form-control bg-white text-dark border-secondary"
                   placeholder="Title"
                   maxLength={300}
                   required
@@ -153,7 +161,7 @@ export default function CreatePost() {
               {(activeTab === 'text' || activeTab === 'media' || activeTab === 'video') && (
                 <div className="mb-3">
                   <textarea
-                    className="form-control bg-dark text-light border-secondary"
+                    className="form-control bg-white text-dark border-secondary"
                     rows="5"
                     placeholder="Body"
                     value={body}
