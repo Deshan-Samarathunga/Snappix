@@ -31,8 +31,10 @@ export default function CommunityPage() {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
-        setCommunity(res.data.community);
-        setModerators(res.data.community.moderators || []);
+        // Support both {community, onlineCount} and plain community object
+        const communityData = res.data.community || res.data;
+        setCommunity(communityData);
+        setModerators(communityData.moderators || []);
         setOnlineCount(res.data.onlineCount || 0);
         setError(null);
         setLoading(false);
@@ -48,6 +50,7 @@ export default function CommunityPage() {
       .then(res => setPosts(res.data))
       .catch(() => {});
 
+    // Online presence tracking
     axios.post(`http://localhost:8080/api/communities/presence/${name}/join`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -316,7 +319,6 @@ export default function CommunityPage() {
                       {community.members.map((memberEmail, idx) => (
                         <li key={idx} className="member-item" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <span>{memberEmail}</span>
-                          {/* 3-dot menu for member actions */}
                           <div onClick={e => e.stopPropagation()}>
                             <IconButton
                               size="small"

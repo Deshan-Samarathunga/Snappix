@@ -12,6 +12,7 @@ import EditPost from './pages/EditPost';
 import EditCommunity from './pages/EditCommunity';
 import PrivateRoute from './components/PrivateRoute';
 import SessionManager from './components/SessionManager';
+import SinglePostPage from './pages/SinglePostPage';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -20,6 +21,7 @@ function App() {
   return (
     <>
       <Router>
+        {/* Manages auto logout & refresh token logic */}
         <SessionManager />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -28,10 +30,12 @@ function App() {
           <Route path="/create-community" element={<PrivateRoute><CreateCommunity /></PrivateRoute>} />
           <Route path="/c/:name" element={<CommunityPage />} />
           <Route path="/explore" element={<PrivateRoute><ExploreCommunities /></PrivateRoute>} />
+          <Route path="/post/:id" element={<SinglePostPage />} />
           <Route path="/edit-post/:id" element={<EditPost />} />
           <Route path="/edit-community/:id" element={<PrivateRoute><EditCommunity /></PrivateRoute>} />
         </Routes>
       </Router>
+      {/* Global toast message container */}
       <ToastContainer position="top-center" autoClose={2500} />
     </>
   );

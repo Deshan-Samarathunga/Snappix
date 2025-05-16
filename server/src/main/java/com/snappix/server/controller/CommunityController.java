@@ -42,7 +42,7 @@ public class CommunityController {
         return communityRepo.findByCreatedBy(email);
     }
 
-    // Get a community by name
+    // Get a community by name (with online count)
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getCommunityByName(@PathVariable String name) {
         Optional<Community> found = communityRepo.findByNameIgnoreCase(name);
@@ -56,7 +56,7 @@ public class CommunityController {
         return ResponseEntity.status(404).body("Community not found");
     }
 
-    // Get a community by id
+    // Get a community by id (with online count)
     @GetMapping("/{id}")
     public ResponseEntity<?> getCommunityById(@PathVariable String id) {
         Optional<Community> found = communityRepo.findById(id);
@@ -302,7 +302,7 @@ public class CommunityController {
         return ResponseEntity.ok(joined);
     }
 
-    // Presence endpoints (unchanged)
+    // Presence endpoints
     @PostMapping("/presence/{name}/join")
     public ResponseEntity<?> trackUserJoined(
             @RequestHeader("Authorization") String authHeader,

@@ -1,4 +1,3 @@
-// src/main/java/com/snappix/server/model/Community.java
 package com.snappix.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,7 +25,7 @@ public class Community {
     private List<String> moderators = new ArrayList<>();
     private List<String> members = new ArrayList<>();
     private Date createdAt;
-    
+
     public Community() {}
 
     public Community(String name, String description, String iconUrl) {
@@ -35,7 +34,7 @@ public class Community {
         this.iconUrl = iconUrl;
     }
 
-    //Getters and Setters
+    // Getters and Setters
 
     public String getId() {
         return id;
@@ -89,14 +88,14 @@ public class Community {
     public void setMembers(List<String> members) {
         this.members = members;
     }
-    
+
     public List<String> getModerators() {
         return moderators;
     }
     public void setModerators(List<String> moderators) {
         this.moderators = moderators;
     }
-    
+
     public Date getCreatedAt() {
         return createdAt;
     }

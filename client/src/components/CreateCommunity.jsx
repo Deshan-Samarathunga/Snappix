@@ -64,6 +64,7 @@ export default function CreateCommunity() {
       navigate(`/c/${newCommunity.name}`);
     } catch (err) {
       console.error("Error details:", err.response?.data || err.message);
+      console.error(err);
       toast.error("❌ Failed to create community.");
     }
   };
