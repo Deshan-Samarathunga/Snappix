@@ -14,12 +14,14 @@ import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DeleteModal from './DeleteModal';
+import SharePostModal from './SharePostModal';
 import { Carousel } from 'react-bootstrap';
 
 export default function PostCard({ post, location = 'home' }) {
   const [isOwner, setIsOwner] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -50,7 +52,7 @@ export default function PostCard({ post, location = 'home' }) {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => window.location.reload())
-      .catch(() => alert('❌ Delete failed'));
+      .catch(() => alert('Delete failed'));
   };
 
   const goToSinglePost = () => {
@@ -133,6 +135,13 @@ export default function PostCard({ post, location = 'home' }) {
         </p>
       </div>
 
+      {post.originalPostId && post.originalCommunity && (
+        <div className="text-muted" style={{ fontSize: '12px' }}>
+          Shared from <span className="text-info">c/{post.originalCommunity}</span>
+        </div>
+      )}
+
+
       {post.mediaUrls?.length === 1 && renderSingleMedia(post.mediaUrls[0])}
       {post.mediaUrls?.length > 1 && renderCarousel()}
 
@@ -146,11 +155,22 @@ export default function PostCard({ post, location = 'home' }) {
         >
           <FontAwesomeIcon icon={faCommentDots} className="me-1" /> 0
         </span>
-
-        <span><FontAwesomeIcon icon={faShare} className="me-1" /> Share</span>
+        <span role="button" onClick={() => setShowShareModal(true)}>
+          <FontAwesomeIcon icon={faShare} className="me-1" /> Share
+        </span>
       </div>
 
-      <DeleteModal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} onConfirm={confirmDelete} />
+      <DeleteModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+      />
+
+      <SharePostModal
+        show={showShareModal}
+        onHide={() => setShowShareModal(false)}
+        originalPost={post}
+      />
     </div>
   );
 }

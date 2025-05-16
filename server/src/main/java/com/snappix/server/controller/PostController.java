@@ -30,8 +30,8 @@ public class PostController {
             @RequestPart(value = "media", required = false) List<MultipartFile> mediaFiles) {
 
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         List<String> mediaUrls = new ArrayList<>();
+
         try {
             if (mediaFiles != null) {
                 for (MultipartFile file : mediaFiles) {
@@ -48,6 +48,37 @@ public class PostController {
         return ResponseEntity.ok(saved);
     }
 
+    @PostMapping("/crosspost")
+    public ResponseEntity<?> crosspost(@RequestBody Map<String, String> body) {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String originalPostId = body.get("originalPostId");
+        String title = body.get("title");
+        String community = body.get("community");
+
+        Optional<Post> originalOpt = postRepo.findById(originalPostId);
+        if (originalOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Original post not found");
+        }
+
+        Post original = originalOpt.get();
+
+        // Remove the old appended description text here
+        String newDescription = title;
+
+        Post crossPost = new Post(
+                email,
+                original.getUserName(),
+                community.trim().toLowerCase(),
+                newDescription,
+                original.getMediaUrls()
+        );
+        crossPost.setOriginalPostId(original.getId());
+        crossPost.setOriginalCommunity(original.getCommunity());
+
+        Post saved = postRepo.save(crossPost);
+        return ResponseEntity.ok(saved);
+    }
+
     @GetMapping
     public ResponseEntity<?> getAllPosts() {
         return ResponseEntity.ok(postRepo.findAll());
@@ -58,40 +89,12 @@ public class PostController {
         return ResponseEntity.ok(postRepo.findByCommunityIgnoreCase(name));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePost(@PathVariable String id) {
-        Optional<Post> optionalPost = postRepo.findById(id);
-
-        if (optionalPost.isEmpty()) {
-            return ResponseEntity.status(404).body("Post not found");
-        }
-
-        Post post = optionalPost.get();
-
-        try {
-            // Delete media files from S3
-            if (post.getMediaUrls() != null) {
-                for (String url : post.getMediaUrls()) {
-                    s3Service.deleteFileByUrl(url);
-                }
-            }
-
-            // Delete the post document
-            postRepo.deleteById(id);
-            return ResponseEntity.ok("Post deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to delete post");
-        }
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getPostById(@PathVariable String id) {
         Optional<Post> post = postRepo.findById(id);
-        if (post.isPresent()) {
-            return ResponseEntity.ok(post.get());
-        } else {
-            return ResponseEntity.status(404).body("Post not found");
-        }
+        return post.isPresent()
+                ? ResponseEntity.ok(post.get())
+                : ResponseEntity.status(404).body("Post not found");
     }
 
     @PutMapping("/{id}")
@@ -107,4 +110,25 @@ public class PostController {
         return ResponseEntity.ok("Post updated successfully");
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable String id) {
+        Optional<Post> optionalPost = postRepo.findById(id);
+        if (optionalPost.isEmpty()) {
+            return ResponseEntity.status(404).body("Post not found");
+        }
+
+        Post post = optionalPost.get();
+
+        try {
+            if (post.getMediaUrls() != null) {
+                for (String url : post.getMediaUrls()) {
+                    s3Service.deleteFileByUrl(url);
+                }
+            }
+            postRepo.deleteById(id);
+            return ResponseEntity.ok("Post deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to delete post");
+        }
+    }
 }
