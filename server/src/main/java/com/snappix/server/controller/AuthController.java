@@ -6,7 +6,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.snappix.server.model.RefreshToken;
+import com.snappix.server.model.User;
 import com.snappix.server.repository.RefreshTokenRepository;
+import com.snappix.server.repository.UserRepository;
 import com.snappix.server.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,6 +30,9 @@ public class AuthController {
     @Autowired
     private RefreshTokenRepository refreshTokenRepo;
 
+    @Autowired
+    private UserRepository userRepo;
+
     private static final String CLIENT_ID = "968315316960-1istdm8ck261a5u23iopbhbtr7jerpdl.apps.googleusercontent.com";
 
     @PostMapping("/google")
@@ -47,6 +52,15 @@ public class AuthController {
             String email = payload.getEmail();
             String name = (String) payload.get("name");
             String picture = (String) payload.get("picture");
+
+            User user = userRepo.findByEmail(email).orElseGet(() -> {
+                User newUser = User.builder()
+                        .email(email)
+                        .name(name)
+                        .profilePictureUrl(picture)
+                        .build();
+                return userRepo.save(newUser);
+            });
 
             String accessToken = jwtUtil.generateToken(email, 30); // 30 min access token
             String refreshToken = jwtUtil.generateToken(email, 60 * 24 * 7); // 7 days refresh token
