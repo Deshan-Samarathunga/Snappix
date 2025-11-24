@@ -1,3 +1,4 @@
+
 .post-card {
   background: #1a1a1b;
   border: 1px solid #343536;
@@ -5,7 +6,7 @@
   border-radius: 8px;
   margin: 0 auto 20px;
   max-width: 640px;
-  color: #d7dadc;
+  color: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   transition: background-color 0.2s ease;
 }
@@ -20,11 +21,11 @@
 }
 
 .post-card p {
-  color: #d0d0d0;
+  color: #fefefe;
 }
 
 .post-card .text-muted {
-  color: #bbb !important;
+  color: #ffffff !important;
 }
 
 .post-header {

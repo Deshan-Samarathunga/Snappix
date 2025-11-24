@@ -4,17 +4,34 @@
 //import axios from 'axios';
 //const res = await axios.post("http://localhost:8080/api/communities", formData, {
 //Authorization: `Bearer ${token}`,
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-//import api from '../utils/axiosInstance';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Topbar from './Topbar';
 import Sidebar from './Sidebar';
+import './CreateCommunity.css';
 
 const topicsList = [
-  "Filmmaking", "Photography", "Gear", "Editing", "Cinematic",
-  "Analog", "Nature", "Portrait", "Urban", "Events", "Drone", "Experimental"
+  'Filmmaking',
+  'Photography',
+  'Gear',
+  'Editing',
+  'Cinematic',
+  'Analog',
+  'Nature',
+  'Portrait',
+  'Urban',
+  'Events',
+  'Drone',
+  'Experimental',
+];
+
+const steps = [
+  { id: 1, title: 'Basics', description: 'Name & description' },
+  { id: 2, title: 'Branding', description: 'Icon & banner' },
+  { id: 3, title: 'Topics', description: 'Choose up to three' },
+  { id: 4, title: 'Review', description: 'Double-check details' },
 ];
 
 export default function CreateCommunity() {
@@ -24,130 +41,241 @@ export default function CreateCommunity() {
   const [icon, setIcon] = useState(null);
   const [banner, setBanner] = useState(null);
   const [selectedTopics, setSelectedTopics] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const toggleTopic = (topic) => {
-    setSelectedTopics(prev =>
+    setSelectedTopics((prev) =>
       prev.includes(topic)
-        ? prev.filter(t => t !== topic)
+        ? prev.filter((t) => t !== topic)
         : prev.length < 3
           ? [...prev, topic]
           : prev
     );
   };
 
-  const handleSubmit = async () => {
-    try {
-      const token = localStorage.getItem("snappixSession");
-      const formData = new FormData();
-      formData.append("name", name.trim());
-      formData.append("description", description);
-      formData.append("topics", JSON.stringify(selectedTopics));
-      if (icon) formData.append("icon", icon);
-      if (banner) formData.append("banner", banner);
-
-      const res = await axios.post("http://localhost:8080/api/communities", formData, {
-      //const res = await api.post("/api/communities", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
-        }
-      });
-
-
-      const newCommunity = res.data;
-      toast.success("Community created!");
-      navigate(`/c/${newCommunity.name}`); // redirect to community page
-    } catch (err) {
-      console.error("Error details:", err.response?.data || err.message);
-      console.error(err); 
-      toast.error("Failed to create community.");
+  const canProceed = useMemo(() => {
+    switch (step) {
+      case 1:
+        return name.trim().length >= 3 && description.trim().length >= 20;
+      case 2:
+        return true;
+      case 3:
+        return selectedTopics.length > 0;
+      default:
+        return true;
     }
+  }, [step, name, description, selectedTopics]);
 
+  const goToNext = () => {
+    if (step < steps.length && canProceed) {
+      setStep((prev) => prev + 1);
+    }
   };
 
-  return (
-    <div className="bg-black text-white min-vh-100 overflow-hidden">
-      <Topbar />
-      <div className="d-flex">
-        <Sidebar />
-        <main
-          className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center"
-          style={{
-            marginLeft: '280px',
-            marginTop: '60px',
-            height: 'calc(100vh - 60px)',
-            overflowY: 'auto',
-            backgroundColor: '#000000',
-          }}
-        >
-          <div className="w-100" style={{ maxWidth: '640px' }}>
-            <h3 className="fw-bold mb-4">Create a Community</h3>
+  const goToPrevious = () => {
+    if (step > 1) {
+      setStep((prev) => prev - 1);
+    }
+  };
 
-            {step === 1 && (
-              <>
-                <div className="mb-3">
-                  <label className="form-label">Community Name*</label>
-                  <input type="text" className="form-control bg-dark text-light border-secondary" value={name} required onChange={e => setName(e.target.value)} />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Description*</label>
-                  <textarea className="form-control bg-dark text-light border-secondary" value={description} required onChange={e => setDescription(e.target.value)} rows="4" />
-                </div>
-                <button className="btn btn-warning" onClick={() => setStep(2)}>Next</button>
-              </>
-            )}
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('snappixSession');
+      const formData = new FormData();
+      formData.append('name', name.trim());
+      formData.append('description', description.trim());
+      formData.append('topics', JSON.stringify(selectedTopics));
+      if (icon) formData.append('icon', icon);
+      if (banner) formData.append('banner', banner);
 
-            {step === 2 && (
-              <>
-                <div className="mb-3">
-                  <label className="form-label">Upload Icon</label>
-                  <input type="file" accept="image/*" className="form-control" onChange={e => setIcon(e.target.files[0])} />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Upload Banner</label>
-                  <input type="file" accept="image/*" className="form-control" onChange={e => setBanner(e.target.files[0])} />
-                </div>
-                <button className="btn btn-secondary me-2" onClick={() => setStep(1)}>Back</button>
-                <button className="btn btn-warning" onClick={() => setStep(3)}>Next</button>
-              </>
-            )}
+      const response = await axios.post(
+        'http://localhost:8080/api/communities',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
-            {step === 3 && (
-              <>
-                <p>Select up to 3 topics that fit your community:</p>
-                <div className="d-flex flex-wrap gap-2 mb-3">
-                  {topicsList.map(topic => (
-                    <button
-                      key={topic}
-                      type="button"
-                      className={`btn btn-sm ${selectedTopics.includes(topic) ? 'btn-info' : 'btn-outline-secondary'}`}
-                      onClick={() => toggleTopic(topic)}
-                    >
-                      {topic}
-                    </button>
-                  ))}
-                </div>
-                <button className="btn btn-secondary me-2" onClick={() => setStep(2)}>Back</button>
-                <button className="btn btn-warning" onClick={() => setStep(4)}>Next</button>
-              </>
-            )}
+      toast.success('Community created!');
+      navigate(`/c/${response.data.name}`);
+    } catch (err) {
+      console.error('Error creating community', err.response?.data || err);
+      toast.error('Failed to create community.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-            {step === 4 && (
-              <>
-                <h5 className="text-success">Confirm Details</h5>
-                <ul className="list-group mb-3">
-                  <li className="list-group-item bg-dark text-light">Name: {name}</li>
-                  <li className="list-group-item bg-dark text-light">Description: {description}</li>
-                  <li className="list-group-item bg-dark text-light">Topics: {selectedTopics.join(", ")}</li>
-                </ul>
-                <button className="btn btn-secondary me-2" onClick={() => setStep(3)}>Back</button>
-                <button className="btn btn-success" onClick={handleSubmit}>Create Community</button>
-              </>
-            )}
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="form-stack">
+            <label className="input-label">
+              Community name
+              <input
+                className="input-control"
+                placeholder="e.g. Cinematic Frames"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={32}
+              />
+            </label>
+            <label className="input-label">
+              Description
+              <textarea
+                className="input-control"
+                placeholder="Tell the community who you are and what stories belong here."
+                rows={5}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </label>
+            <small className="field-hint">
+              Aim for at least 20 characters so newcomers instantly understand the vibe.
+            </small>
           </div>
-        </main>
-      </div>
+        );
+      case 2:
+        return (
+          <div className="form-stack">
+            <label className="input-label">
+              Icon (square works best)
+              <input
+                type="file"
+                accept="image/*"
+                className="input-control"
+                onChange={(e) => setIcon(e.target.files[0])}
+              />
+            </label>
+            <label className="input-label">
+              Banner (optional)
+              <input
+                type="file"
+                accept="image/*"
+                className="input-control"
+                onChange={(e) => setBanner(e.target.files[0])}
+              />
+            </label>
+            <small className="field-hint">
+              Banners look great at 1600×400px. You can update assets at any time.
+            </small>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="form-stack">
+            <p className="input-label">Select up to three topics</p>
+            <div className="topic-grid">
+              {topicsList.map((topic) => (
+                <button
+                  key={topic}
+                  type="button"
+                  className={`topic-chip ${selectedTopics.includes(topic) ? 'topic-chip--active' : ''}`}
+                  onClick={() => toggleTopic(topic)}
+                >
+                  {topic}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="form-stack">
+            <h3 className="review-title">Almost there</h3>
+            <div className="review-grid">
+              <article>
+                <span className="review-label">Name</span>
+                <p>{name}</p>
+              </article>
+              <article>
+                <span className="review-label">Description</span>
+                <p>{description}</p>
+              </article>
+              <article>
+                <span className="review-label">Topics</span>
+                <p>{selectedTopics.join(', ') || '—'}</p>
+              </article>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  const progress = (step / steps.length) * 100;
+
+  return (
+    <div className="app-shell">
+      <Topbar />
+      <Sidebar />
+      <main className="app-main create-community-main">
+        <section className="glass-panel create-community-panel">
+          <header className="create-community-header">
+            <div>
+              <p className="eyebrow-text">Community builder</p>
+              <h1>Craft a new space</h1>
+              <p className="subtitle">
+                Guide creators with a memorable name, a quick story, and a few topics.
+                It only takes a minute.
+              </p>
+            </div>
+            <div className="builder-progress">
+              <span>Step {step} of {steps.length}</span>
+              <div className="progress-bar">
+                <div className="progress-bar__value" style={{ width: `${progress}%` }} />
+              </div>
+            </div>
+          </header>
+
+          <nav className="stepper">
+            {steps.map(({ id, title }) => (
+              <div key={id} className={`stepper-item ${step === id ? 'stepper-item--active' : ''}`}>
+                <span>{id}</span>
+                <p>{title}</p>
+              </div>
+            ))}
+          </nav>
+
+          <div className="step-body">{renderStep()}</div>
+
+          <footer className="builder-actions">
+            <button
+              type="button"
+              className="pill-button pill-button--ghost"
+              onClick={goToPrevious}
+              disabled={step === 1}
+            >
+              Back
+            </button>
+            {step < steps.length ? (
+              <button
+                type="button"
+                className="pill-button pill-button--primary"
+                onClick={goToNext}
+                disabled={!canProceed}
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="pill-button pill-button--primary"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Publishing…' : 'Create community'}
+              </button>
+            )}
+          </footer>
+        </section>
+      </main>
     </div>
   );
 }

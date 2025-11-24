@@ -136,16 +136,27 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="bg-black text-white min-vh-100 overflow-hidden">
+    <div className="create-post-page">
       <Topbar />
-      <div className="d-flex">
+      <div className="create-post-shell">
         <Sidebar />
-        <main className="flex-grow-1 px-4 pt-4 pb-5 d-flex justify-content-center" style={{ marginLeft: '280px', marginTop: '60px', height: 'calc(100vh - 60px)', overflowY: 'auto', backgroundColor: '#1a1a1b' }}>
-          <div className="create-post-container bg-dark text-light p-4 rounded shadow w-100" style={{ maxWidth: '640px' }}>
-            <h5 className="fw-bold mb-3">Create post</h5>
+        <main className="create-post-main">
+          <section className="create-post-panel">
+            <header className="create-post-header">
+              <div>
+                <p className="eyebrow-label">Share with your communities</p>
+                <h1>Create post</h1>
+              </div>
+            </header>
 
-            <div className="mb-4">
-              <select className="form-select bg-dark text-light border-secondary" value={community} onChange={(e) => setCommunity(e.target.value)}>
+            <div className="create-post-field">
+              <label htmlFor="community-select">Community</label>
+              <select
+                id="community-select"
+                className="create-post-select"
+                value={community}
+                onChange={(e) => setCommunity(e.target.value)}
+              >
                 <option value="">Select a community</option>
                 {userCommunities.map((c) => (
                   <option key={c.id} value={c.name}>{c.name}</option>
@@ -153,56 +164,96 @@ export default function CreatePost() {
               </select>
             </div>
 
-            <ul className="nav nav-tabs mb-3 border-secondary">
+            <div className="create-post-tabs" role="tablist">
               {['text', 'media', 'video'].map((tab) => (
-                <li className="nav-item" key={tab}>
-                  <button className={`nav-link ${activeTab === tab ? 'active' : ''} text-white`} onClick={() => setActiveTab(tab)}>
-                    {tab === 'text' ? 'Text' : tab === 'media' ? 'Images' : 'Video'}
-                  </button>
-                </li>
+                <button
+                  type="button"
+                  key={tab}
+                  className={`create-post-tab ${activeTab === tab ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                >
+                  {tab === 'text' ? 'Text' : tab === 'media' ? 'Images' : 'Video'}
+                </button>
               ))}
-            </ul>
+            </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <input type="text" className="form-control bg-dark text-light border-secondary" placeholder="Title" maxLength={300} required value={title} onChange={(e) => setTitle(e.target.value)} />
-                <small className="text-muted">{title.length}/300</small>
+            <form onSubmit={handleSubmit} className="create-post-form">
+              <div className="create-post-field">
+                <label htmlFor="title-input">Title</label>
+                <input
+                  id="title-input"
+                  type="text"
+                  className="create-post-input"
+                  placeholder="Add an attention-grabbing title"
+                  maxLength={300}
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <small>{title.length}/300</small>
               </div>
 
               {(activeTab === 'media' || activeTab === 'video') && (
-                <>
-                  <div className="mb-3 border border-secondary rounded p-5 text-center text-muted" style={{ borderStyle: 'dashed' }}>
-                    <p className="mb-0">Drag and Drop media or</p>
-                    <input type="file" className="form-control mt-2" accept={activeTab === 'media' ? 'image/*' : 'video/*'} multiple onChange={handleFileChange} />
-                    <small className="text-muted mt-2">Max 3 files. Videos must be under 30 seconds.<br />Cannot mix image and video types in a single post.</small>
+                <div className="create-post-field">
+                  <label>{activeTab === 'media' ? 'Images' : 'Video'}</label>
+                  <div className="create-post-dropzone">
+                    <p>Drag and drop files here</p>
+                    <span>or</span>
+                    <label className="create-post-upload">
+                      <input
+                        type="file"
+                        accept={activeTab === 'media' ? 'image/*' : 'video/*'}
+                        multiple={activeTab === 'media'}
+                        onChange={handleFileChange}
+                      />
+                      Choose Files
+                    </label>
+                    <small>
+                      {activeTab === 'media'
+                        ? 'Max 3 images per post. Images only.'
+                        : 'Single video up to 30 seconds.'}
+                      <br />Cannot mix image and video types in a single post.
+                    </small>
                   </div>
 
                   {previewUrls.length > 0 && (
-                    <div className="d-flex flex-wrap gap-2 mb-3">
+                    <div className="create-post-preview-grid">
                       {previewUrls.map((url, index) => (
-                        <div key={index} className="position-relative">
+                        <div key={index} className="create-post-preview">
                           {media[index].type.startsWith('video/') ? (
-                            <video src={url} className="border border-secondary rounded" style={{ maxWidth: 130 }} muted />
+                            <video src={url} muted loop />
                           ) : (
-                            <img src={url} className="border border-secondary rounded" style={{ maxWidth: 130 }} alt={`preview-${index}`} />
+                            <img src={url} alt={`preview-${index}`} />
                           )}
-                          <button type="button" className="btn-close btn-close-white position-absolute top-0 end-0 m-1" onClick={() => removeMedia(index)} />
+                          <button type="button" onClick={() => removeMedia(index)} aria-label="Remove media" />
                         </div>
                       ))}
                     </div>
                   )}
-                </>
+                </div>
               )}
 
-              <div className="mb-3">
-                <textarea className="form-control bg-dark text-light border-secondary" rows="5" placeholder="Body" value={body} onChange={(e) => setBody(e.target.value)} />
+              <div className="create-post-field">
+                <label htmlFor="body-input">Body</label>
+                <textarea
+                  id="body-input"
+                  className="create-post-textarea"
+                  rows="5"
+                  placeholder="Tell everyone what this post is about"
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                />
               </div>
 
-              <div className="d-flex justify-content-end">
-                <button type="submit" className="btn btn-warning" disabled={isSubmitting}>{isSubmitting ? 'Posting...' : 'Post'}</button>
+              <div className="create-post-actions">
+                <button type="submit" className="pill-button create-post-submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Posting…' : 'Post'}
+                </button>
               </div>
             </form>
-          </div>
+          </section>
         </main>
       </div>
     </div>

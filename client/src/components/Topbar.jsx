@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
+import './Topbar.css';
 
 export default function Topbar() {
   const [showModal, setShowModal] = useState(false);
@@ -92,15 +93,17 @@ export default function Topbar() {
 
   return (
     <>
-      <div className="bg-dark text-light px-4 py-2 d-flex justify-content-between align-items-center border-bottom border-secondary position-fixed top-0 w-100 z-3">
-        <div className="d-flex align-items-center">
-          <img src={logo} alt="Snappix Logo" height={40} className="me-3" />
+      <div className="topbar">
+        <div className="topbar__brand">
+          <img src={logo} alt="Snappix Logo" height={40} />
         </div>
 
-        <input type="text" placeholder="Search" className="form-control mx-4 w-50 rounded-pill px-3" />
+        <div className="topbar__search">
+          <input type="text" placeholder="Search posts, people or communities" />
+        </div>
 
-        <div className="d-flex align-items-center gap-3">
-          <button className="btn btn-outline-light btn-sm rounded-pill px-3" onClick={handleCreatePost}>
+        <div className="topbar__actions">
+          <button className="pill-button pill-button--ghost" onClick={handleCreatePost}>
             + Create Post
           </button>
 
@@ -109,8 +112,7 @@ export default function Topbar() {
               <img
                 src={user.picture}
                 alt="Profile"
-                className="rounded-circle"
-                style={{ width: 32, height: 32, cursor: 'pointer' }}
+                className="topbar__avatar"
                 onClick={toggleDropdown}
               />
               <span onClick={toggleDropdown} style={{ cursor: 'pointer' }} title={user.email}>
@@ -118,26 +120,24 @@ export default function Topbar() {
               </span>
 
               {showDropdown && (
-                <div className="position-absolute end-0 top-100 mt-2 bg-dark border border-secondary rounded shadow-sm z-3" style={{ minWidth: 180 }}>
-                  <div className="px-3 py-2 border-bottom border-secondary bg-secondary text-white small rounded-top">
+                <div className="dropdown-panel">
+                  <div className="dropdown-panel__header">
                     <strong>{getFirstName(user.name)}</strong><br />
-                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>{user.email}</span>
+                    <span className="text-muted-soft small">{user.email}</span>
                   </div>
-                  <Link to="/profile" className="text-decoration-none text-light">
-                    <div className="px-3 py-2 hover-bg-secondary">
-                      <FontAwesomeIcon icon={faUser} className="me-2" />
-                      Profile
-                    </div>
+                  <Link to="/profile" className="dropdown-panel__link" onClick={() => setShowDropdown(false)}>
+                    <FontAwesomeIcon icon={faUser} />
+                    Profile
                   </Link>
-                  <button className="btn btn-sm text-start w-100 text-light px-3 py-2" onClick={handleLogout}>
-                    <FontAwesomeIcon icon={faLock} className="me-2 text-warning" />
+                  <button type="button" onClick={handleLogout}>
+                    <FontAwesomeIcon icon={faLock} className="text-warning me-2" />
                     Logout
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <button className="btn btn-outline-light" onClick={() => setShowModal(true)}>Log In</button>
+            <button className="pill-button pill-button--primary" onClick={() => setShowModal(true)}>Log In</button>
           )}
         </div>
       </div>
