@@ -1,4 +1,3 @@
-// src/main/java/com/snappix/server/model/Community.java
 package com.snappix.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 @Document(collection = "communities")
 public class Community {
@@ -25,6 +25,8 @@ public class Community {
 
     // Members list
     private List<String> members = new ArrayList<>();
+    private List<String> moderators = new ArrayList<>();
+    private Date createdAt;
 
     public Community() {}
 
@@ -87,6 +89,20 @@ public class Community {
     }
     public void setMembers(List<String> members) {
         this.members = members;
+    }
+
+    public List<String> getModerators() {
+        return moderators;
+    }
+    public void setModerators(List<String> moderators) {
+        this.moderators = moderators;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     // Dynamic member count for display
