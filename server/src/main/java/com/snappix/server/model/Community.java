@@ -3,28 +3,40 @@ package com.snappix.server.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
+import jakarta.persistence.ElementCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
-@Document(collection = "communities")
+@Entity
+@Table(name = "communities")
 public class Community {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String name;
     private String description;
     private String iconUrl;
     private String bannerUrl;
+    
+    @ElementCollection
     private List<String> topics;
+    
     private String createdBy;
 
     // Members list
+    @ElementCollection
     private List<String> members = new ArrayList<>();
+    
+    @ElementCollection
     private List<String> moderators = new ArrayList<>();
     private Date createdAt;
 

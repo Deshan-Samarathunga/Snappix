@@ -2,16 +2,25 @@
 
 package com.snappix.server.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinColumn;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.*;
 
-@Document(collection = "comments")
+@Entity
+@Table(name = "comments")
 public class Comment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @JsonProperty("id") // ✅ Ensures _id from Mongo is serialized as "id" in JSON
     private String id;
 
@@ -23,8 +32,14 @@ public class Comment {
     private Date createdAt = new Date();
     private Date updatedAt;
 
+    @ElementCollection
     private List<String> likes = new ArrayList<>();
+    
+    @ElementCollection
     private List<String> dislikes = new ArrayList<>();
+    
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "parent_comment_id")
     private List<Comment> replies = new ArrayList<>();
 
     // Constructors

@@ -1,12 +1,17 @@
 package com.snappix.server.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 
-@Document(collection = "refresh_tokens")
+@Entity
+@Table(name = "refresh_tokens")
 public class RefreshToken {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String token;

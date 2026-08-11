@@ -1,22 +1,30 @@
 // src/main/java/com/snappix/server/model/Post.java
 package com.snappix.server.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
+import jakarta.persistence.ElementCollection;
 
 import java.util.Date;
 import java.util.List;
 
-@Document(collection = "posts")
+@Entity
+@Table(name = "posts")
 public class Post {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String userEmail;
     private String userName;
     private String community;
     private String description;
+    
+    @ElementCollection
     private List<String> mediaUrls;
     private Date createdAt = new Date();
 
