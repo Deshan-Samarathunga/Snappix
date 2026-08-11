@@ -1,0 +1,159 @@
+
+.post-card {
+  background: #1a1a1b;
+  border: 1px solid #343536;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 0 auto 20px;
+  max-width: 640px;
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.2s ease;
+}
+
+.post-card:hover {
+  border-color: #565758;
+  background-color: #1c1d1e;
+}
+
+.post-card h5 {
+  color: #ffffff;
+}
+
+.post-card p {
+  color: #fefefe;
+}
+
+.post-card .text-muted {
+  color: #ffffff !important;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* Media Containers */
+.media-single img,
+.media-single video,
+.media-slide,
+.post-carousel img,
+.post-carousel video,
+.media-thumb {
+  object-fit: contain;
+  background-color: #000;
+  border-radius: 6px;
+}
+
+.media-single img,
+.media-single video {
+  max-height: 480px;
+}
+
+.post-carousel img,
+.post-carousel video {
+  max-height: 450px;
+}
+
+/* Carousel Container */
+.media-carousel {
+  position: relative;
+  background: #0f0f0f;
+  border-radius: 6px;
+  overflow: hidden;
+  max-height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Carousel Arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(50, 50, 50, 0.6);
+  border: none;
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 2;
+  border-radius: 50%;
+}
+
+.carousel-arrow.left {
+  left: 10px;
+}
+
+.carousel-arrow.right {
+  right: 10px;
+}
+
+.carousel-arrow:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Media Grid */
+.media-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.media-grid img,
+.media-grid video {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 4px;
+}
+
+/* Media Thumbnails */
+.media-thumb {
+  width: 100%;
+  max-width: 100%;
+  max-height: 400px;
+  background-color: #0f0f0f;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #343536;
+}
+
+@media (min-width: 768px) {
+  .media-thumb {
+    max-width: 48%;
+  }
+}
+
+@media (min-width: 992px) {
+  .media-thumb {
+    max-width: 32%;
+  }
+}
+
+/* Reusable Media Container */
+.media-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  background-color: #0f0f0f;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  width: 100%;
+  max-height: 500px;
+}
+
+.media-container img,
+.media-container video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}

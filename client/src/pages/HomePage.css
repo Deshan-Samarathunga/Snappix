@@ -1,0 +1,154 @@
+.home-main {
+  display: block;
+  padding: 96px clamp(24px, 5vw, 64px) 48px;
+}
+
+.home-layout {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.home-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(24px, 4vw, 40px);
+}
+
+.home-hero h1 {
+  margin: 8px 0;
+}
+
+.home-hero-copy {
+  color: #ffffff;
+  max-width: 640px;
+}
+
+.home-hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 24px;
+}
+
+.home-feed {
+  padding: 24px;
+}
+
+.home-feed-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #ffffff;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-chip--active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.home-feed-stack {
+  width: 100%;
+}
+
+.home-placeholder {
+  padding: 48px;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+}
+
+.home-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.home-card {
+  padding: 20px;
+}
+
+.home-card h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+}
+
+.home-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-card li {
+  display: flex;
+  justify-content: space-between;
+  color: #ffffff;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 1024px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .home-hero-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .home-hero-actions .pill-button {
+    width: 100%;
+  }
+}
