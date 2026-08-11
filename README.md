@@ -2,11 +2,11 @@
 
 A modern, Reddit-style community platform with a React frontend and Spring Boot/PostgreSQL backend.
 
-## 🚀 Tech Stack
+## Tech Stack
 - **Frontend**: React 19, Redux Toolkit, React-Bootstrap
 - **Backend**: Spring Boot (Java 21), PostgreSQL, JWT, AWS S3
 
-## 🛠️ Getting Started
+## Getting Started
 
 **1. Database**
 Ensure PostgreSQL is running locally on port `5432` with username `postgres` and password `admin`. Tables are auto-generated on startup.
